@@ -181,6 +181,9 @@ $aConfig = array(
     // FALSE - запрашивать у пользователя
     'auto_login' => FALSE,
 
+    // Только регистрация без репоста
+    'registration_only' => FALSE,
+
 );
 
 return $aConfig;

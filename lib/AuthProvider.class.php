@@ -312,6 +312,17 @@ abstract class AuthProvider {
             $this->aRepostRights['group'] = FALSE;
         }
 
+        // Запретим репост, если нужно
+        if (Config::Get('plugin.ar.registration_only')==true) {
+            $this->aRepostRights = array(
+                AuthProvider::REPOST_RIGHT_WALL   => FALSE, // Репост записей стены
+                AuthProvider::REPOST_RIGHT_STATUS => FALSE, // Репост статуса
+                AuthProvider::REPOST_RIGHT_POST   => FALSE, // Репост топиков
+                AuthProvider::REPOST_RIGHT_GROUP => FALSE, // Репост топиков
+                AuthProvider::REPOST_RIGHT_FRIENDS => FALSE, // Поиск друзей по сайту
+            );
+        }
+
         /**
          * Сформируем url авторизации и токена
          */

@@ -57,14 +57,6 @@ CREATE TABLE IF NOT EXISTS `prefix_searched_user` (
   DEFAULT CHARSET =utf8
   AUTO_INCREMENT =1;
 
-# ХРАНИЛИЩЕ КОНФИГА
-CREATE TABLE IF NOT EXISTS `prefix_social_setting` (
-  `setting_key`   VARCHAR(100),
-  `setting_value` VARCHAR(250)
-)
-  ENGINE =MyISAM
-  DEFAULT CHARSET =utf8;
-
 # ШАБЛОНА КОНТАКТА ДЛЯ МОЕГО МИРА
 INSERT INTO `prefix_user_field` (`id`, `type`, `name`, `title`, `pattern`)
 VALUES (NULL, 'social', 'mm', 'Мой Мир', '<a href="http://my.mail.ru/mail/{*}/" rel="nofollow">{*}</a>');

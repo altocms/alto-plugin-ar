@@ -28,54 +28,11 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
     protected $aProviders = array();
 
     /**
-     * Получение конфига из БД
-     */
-    private function LoadConfig() {
-
-        $aSocialConfig = array();
-
-        $aResult = $this->PluginAr_AuthProvider_GetSettingItemsAll();
-        if ($aResult) {
-            $bLabel = FALSE;
-            foreach ($aResult as $oSetting) {
-
-                if ($oSetting->getSettingKey() == 'default_text_type_text') {
-                    $bLabel = TRUE;
-                }
-                $aSocialConfig[$oSetting->getSettingKey()] = $oSetting->getSettingValue();
-            }
-
-            if (!$bLabel) {
-                $aSocialConfig['default_text_type_text'] = 'Мой новый топик: {link}';
-            }
-        }
-
-        return $aSocialConfig;
-    }
-
-    /**
      * Инициализация модуля
      */
     public function Init() {
 
         parent::Init();
-
-        $aSocialConfig = $this->LoadConfig();
-        foreach ($aSocialConfig as $sKey => $sValue) {
-            list($sName) = explode('_', $sKey);
-
-            if ($sName == 'default') {
-                Config::Set("plugin.ar.default_text_type_text", $sValue);
-                continue;
-            }
-
-            if ($sName == 'application') {
-                Config::Set("plugin.ar.providers.github.application_name", $sValue);
-                continue;
-            }
-
-            Config::Set("plugin.ar.providers.{$sName}.{$sKey}", $sValue);
-        }
 
         foreach (Config::Get('plugin.ar.providers') as $sProviderName => $aProviderData) {
             /** @noinspection PhpIncludeInspection */
@@ -87,12 +44,12 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
             if (isset($this->aProviders[$sProviderName]))
                 continue;
 
-              if (!isset($aSocialConfig[$sProviderName . '_' . 'client_id']) || empty($aSocialConfig[$sProviderName . '_' . 'client_id'])) {
-                  continue;
+            if (!isset($aProviderData[$sProviderName . '_client_id']) || !$aProviderData[$sProviderName . '_client_id']) {
+                continue;
             }
 
             // Проверим секретный ключ
-            if (!isset($aSocialConfig[$sProviderName . '_' . 'secret_key']) || empty($aSocialConfig[$sProviderName . '_' . 'secret_key'])) {
+            if (!isset($aProviderData[$sProviderName . '_secret_key']) || !$aProviderData[$sProviderName . '_secret_key']) {
                 continue;
             }
 

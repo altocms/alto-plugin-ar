@@ -38,10 +38,12 @@
                         <thead>
                             <tr>
                                 <th colspan="2"></th>
-                                <th><strong>{$aLang.plugin.ar.repost_post}</strong></th>
-                                <th><strong>{$aLang.plugin.ar.repost_wall}</strong></th>
-                                <th><strong>{$aLang.plugin.ar.repost_status}</strong></th>
-                                <th><strong>{$aLang.plugin.ar.find_friends}</strong></th>
+                                {if Config::Get('plugin.ar.registration_only')==false}
+                                    <th><strong>{$aLang.plugin.ar.repost_post}</strong></th>
+                                    <th><strong>{$aLang.plugin.ar.repost_wall}</strong></th>
+                                    <th><strong>{$aLang.plugin.ar.repost_status}</strong></th>
+                                    <th><strong>{$aLang.plugin.ar.find_friends}</strong></th>
+                                {/if}
                             </tr>
                         </thead>
                         <tbody>
@@ -51,70 +53,72 @@
                                         <img src="{asset file="assets/img/{$oToken->getTokenProviderName()}.png" plugin="ar" theme=true}" alt="{$oToken->getTokenProviderName()}"/>
                                     </td>
                                     <td>
-                                        {$aLang.plugin.ar["{$oToken->getTokenProviderName()}"]}
-                                        &nbsp;&nbsp;
-                                        <a href="#"
-                                           data-toggle="tooltip"
-                                           class="fa fa-times red"
-                                           title='{$aLang.plugin.ar.remove_social|ls_lang:"social_name%%{$aLang.plugin.ar[{$oToken->getTokenProviderName()}]}"}'
-                                        onclick="
-                                            if (confirm('{$aLang.plugin.ar.confirm_remove|ls_lang:"social_name%%{$aLang.plugin.ar[{$oToken->getTokenProviderName()}]}"}')) {
-                                                return ls.ar.removeSocial($(this), {$oToken->getTokenId()});
-                                            }
-                                            return false;
-                                        "></a>
-                                        {if isset($aProviders[$oToken->getTokenProviderName()]) && $oToken->getTokenExpire()>0 && $oToken->getTokenExpire()<time()}
-                                            <a class="fa fa-repeat green"
-                                               onclick="$(this).addClass('fa-times')"
-                                               href="{$aProviders[$oToken->getTokenProviderName()]->sAuthUrl}"></a>
-                                        {/if}
-                                    </td>
-                                    {$iTokenId = $oToken->getTokenId()}
-                                    <td class="tac">
-                                        {if isset($aProviders[$oToken->getTokenProviderName()]) &&  $aProviders[$oToken->getTokenProviderName()]->aRepostRights['post'] == true}
-                                        <input type="checkbox"
-                                               {if isset($aRepost[$iTokenId]['post']) && $aRepost[$iTokenId]['post']->getSettingValue() == 1}checked{/if}
-                                               onchange="ls.ar.toggleRepost($(this));"
-                                               data-type="post"
-                                               data-id="{$iTokenId}"
-                                               id="post-{$oToken->getTokenProviderName()}"/>
-                                        {else}
-                                            <span class="repost-no">-</span>
-                                        {/if}
-                                    </td>
-                                    <td class="tac">
-                                        {if isset($aProviders[$oToken->getTokenProviderName()]) &&  $aProviders[$oToken->getTokenProviderName()]->aRepostRights['wall'] == true}
-                                        <input type="checkbox"
-                                               {if isset($aRepost[$iTokenId]['wall']) && $aRepost[$iTokenId]['wall']->getSettingValue() == 1}checked{/if}
-                                               onchange="ls.ar.toggleRepost($(this));"
-                                               data-type="wall"
-                                               data-id="{$iTokenId}"
-                                               id="post-{$oToken->getTokenProviderName()}"/>
-                                        {else}
-                                            <span class="repost-no">-</span>
-                                        {/if}
-                                    </td>
-                                    <td class="tac">
-                                        {if isset($aProviders[$oToken->getTokenProviderName()]) &&  $aProviders[$oToken->getTokenProviderName()]->aRepostRights['status'] == true}
-                                        <input type="checkbox"
-                                               {if isset($aRepost[$iTokenId]['status']) && $aRepost[$iTokenId]['status']->getSettingValue() == 1}checked{/if}
-                                               onchange="ls.ar.toggleRepost($(this));"
-                                               data-type="status"
-                                               data-id="{$iTokenId}"
-                                               id="post-{$oToken->getTokenProviderName()}"/>
-                                        {else}
-                                            <span class="repost-no">-</span>
-                                        {/if}
-                                    </td>
-                                    <td class="tac">
-                                        {if isset($aProviders[$oToken->getTokenProviderName()]) &&  $aProviders[$oToken->getTokenProviderName()]->aRepostRights['friends'] == true}
-                                            <a class="btn btn-default btn-sm"
-                                               onclick="ls.ar.findFriends($(this), '{$oToken->getTokenId()}'); return false;"
-                                               href="#"><i class="fa fa-plus green"></i>&nbsp;{intval({$oToken->getSearchedCount()})}</a>
-                                        {else}
-                                            <span class="repost-no">-</span>
-                                        {/if}
-                                    </td>
+                                            {$aLang.plugin.ar["{$oToken->getTokenProviderName()}"]}
+                                            &nbsp;&nbsp;
+                                            <a href="#"
+                                               data-toggle="tooltip"
+                                               class="fa fa-times red"
+                                               title='{$aLang.plugin.ar.remove_social|ls_lang:"social_name%%{$aLang.plugin.ar[{$oToken->getTokenProviderName()}]}"}'
+                                            onclick="
+                                                if (confirm('{$aLang.plugin.ar.confirm_remove|ls_lang:"social_name%%{$aLang.plugin.ar[{$oToken->getTokenProviderName()}]}"}')) {
+                                                    return ls.ar.removeSocial($(this), {$oToken->getTokenId()});
+                                                }
+                                                return false;
+                                            "></a>
+                                            {if isset($aProviders[$oToken->getTokenProviderName()]) && $oToken->getTokenExpire()>0 && $oToken->getTokenExpire()<time()}
+                                                <a class="fa fa-repeat green"
+                                                   onclick="$(this).addClass('fa-times')"
+                                                   href="{$aProviders[$oToken->getTokenProviderName()]->sAuthUrl}"></a>
+                                            {/if}
+                                        </td>
+                                    {if Config::Get('plugin.ar.registration_only')==false}
+                                        {$iTokenId = $oToken->getTokenId()}
+                                        <td class="tac">
+                                            {if isset($aProviders[$oToken->getTokenProviderName()]) &&  $aProviders[$oToken->getTokenProviderName()]->aRepostRights['post'] == true}
+                                            <input type="checkbox"
+                                                   {if isset($aRepost[$iTokenId]['post']) && $aRepost[$iTokenId]['post']->getSettingValue() == 1}checked{/if}
+                                                   onchange="ls.ar.toggleRepost($(this));"
+                                                   data-type="post"
+                                                   data-id="{$iTokenId}"
+                                                   id="post-{$oToken->getTokenProviderName()}"/>
+                                            {else}
+                                                <span class="repost-no">-</span>
+                                            {/if}
+                                        </td>
+                                        <td class="tac">
+                                            {if isset($aProviders[$oToken->getTokenProviderName()]) &&  $aProviders[$oToken->getTokenProviderName()]->aRepostRights['wall'] == true}
+                                            <input type="checkbox"
+                                                   {if isset($aRepost[$iTokenId]['wall']) && $aRepost[$iTokenId]['wall']->getSettingValue() == 1}checked{/if}
+                                                   onchange="ls.ar.toggleRepost($(this));"
+                                                   data-type="wall"
+                                                   data-id="{$iTokenId}"
+                                                   id="post-{$oToken->getTokenProviderName()}"/>
+                                            {else}
+                                                <span class="repost-no">-</span>
+                                            {/if}
+                                        </td>
+                                        <td class="tac">
+                                            {if isset($aProviders[$oToken->getTokenProviderName()]) &&  $aProviders[$oToken->getTokenProviderName()]->aRepostRights['status'] == true}
+                                            <input type="checkbox"
+                                                   {if isset($aRepost[$iTokenId]['status']) && $aRepost[$iTokenId]['status']->getSettingValue() == 1}checked{/if}
+                                                   onchange="ls.ar.toggleRepost($(this));"
+                                                   data-type="status"
+                                                   data-id="{$iTokenId}"
+                                                   id="post-{$oToken->getTokenProviderName()}"/>
+                                            {else}
+                                                <span class="repost-no">-</span>
+                                            {/if}
+                                        </td>
+                                        <td class="tac">
+                                            {if isset($aProviders[$oToken->getTokenProviderName()]) &&  $aProviders[$oToken->getTokenProviderName()]->aRepostRights['friends'] == true}
+                                                <a class="btn btn-default btn-sm"
+                                                   onclick="ls.ar.findFriends($(this), '{$oToken->getTokenId()}'); return false;"
+                                                   href="#"><i class="fa fa-plus green"></i>&nbsp;{intval({$oToken->getSearchedCount()})}</a>
+                                            {else}
+                                                <span class="repost-no">-</span>
+                                            {/if}
+                                        </td>
+                                    {/if}
                                 </tr>
                             {/foreach}
                         </tbody>
@@ -123,6 +127,7 @@
                 </div>
             </div>
 
+            {if Config::Get('plugin.ar.registration_only')==false}
             <h4>{$aLang.plugin.ar.social_text}</h4>
 
             <div class="row">
@@ -140,6 +145,7 @@
                     </form>
                 </div>
             </div>
+            {/if}
 
             <h4>{$aLang.plugin.ar.social_add_more}</h4>
 

@@ -23,11 +23,53 @@
                     {$aLang.plugin.ar.admin_social_page_title}
                 </h3>
             </div>
-            <div class="b-wbox-content">
                 <div class="b-wbox-content">
                     <form method="post" action="" enctype="multipart/form-data" id="social-setting" class="form-horizontal uniform">
                         <input type="hidden" name="security_ls_key" value="{$LIVESTREET_SECURITY_KEY}" />
 
+                        {* ТЕКСТОВКА ДЛЯ ЗАПОЛНЕНИЯ РЕПОСТА ТОПИКА *}
+                        <div class="control-group">
+                            <label for="banner_name" class="control-label">
+                                {$aLang.plugin.ar.default_text_type_text}:
+                            </label>
+                            <div class="controls twc">
+                                <div class="col-md-12">
+                                    <input class="input-wide" placeholder="{$aLang.plugin.ar.default_text_type_text}" type="text" id="default_text_type_text"
+                                           name="default_text_type_text" value="{$_aRequest.default_text_type_text}"  />
+                                    <span class="help-block">{$aLang.plugin.ar.default_text_type_help}</span>
+                                </div>
+                            </div>
+                            <br/>
+                        </div>
+
+
+                        {* АВТОЛОГИН *}
+                        <div class="control-group">
+                            <div class="controls">
+                                <label>
+                                    <input type="checkbox"
+                                           id="auto_login"
+                                           name="auto_login"
+                                           value="1"
+                                           {if $_aRequest.auto_login}checked="checked"{/if}>
+                                    {$aLang.plugin.ar.admin_auto_login}
+                                </label>
+                            </div>
+                        </div>
+
+                        {* ТОЛЬКО РЕГИСТРАЦИЯ *}
+                        <div class="control-group">
+                            <div class="controls">
+                                <label>
+                                    <input type="checkbox"
+                                           id="registration_only"
+                                           name="registration_only"
+                                           value="1"
+                                           {if $_aRequest.registration_only}checked="checked"{/if}>
+                                    {$aLang.plugin.ar.admin_registration_only}
+                                </label>
+                            </div>
+                        </div>
 
                         {* ОДНОКЛАССНИКИ *}
                         <div class="control-group">
@@ -189,21 +231,6 @@
                         </div>
 
 
-
-                        {* ТЕКСТОВКА ДЛЯ ЗАПОЛНЕНИЯ РЕПОСТА ТОПИКА *}
-                        <div class="control-group">
-                            <label for="banner_name" class="control-label">
-                                {$aLang.plugin.ar.default_text_type_text}:
-                            </label>
-                            <div class="controls">
-                                <div class="col-md-12">
-                                    <input class="input-wide" placeholder="{$aLang.plugin.ar.default_text_type_text}" type="text" id="default_text_type_text"
-                                           name="default_text_type_text" value="{$_aRequest.default_text_type_text}"  />
-                                </div>
-                            </div>
-                        </div>
-
-
                         <br/><br/>
 
                         <input type="submit" name="submit_social" value="{$aLang.plugin.ar.save}" />
@@ -211,7 +238,6 @@
 
                     </form>
                 </div>
-            </div>
         </div>
     </div>
 {/block}

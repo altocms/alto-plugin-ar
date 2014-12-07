@@ -27,3 +27,6 @@ table.social-list .social-logo img { width: 24px; }
 .settings-social li a:hover, .settings-social li:hover { background-color: transparent !important; }
 
 #modal-auth .settings-social, .light-form .settings-social { margin-bottom: 18px; }
+
+.social-form .controls > div { padding-left: 0; }
+.twc { height: 42px; }
