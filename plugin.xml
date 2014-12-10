@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin>
+    <id>ar</id>
     <name>
         <lang name="default">Плагин интеграции с социальными сетями</lang>
         <lang name="english">Social network integration plugin</lang>
@@ -10,6 +11,7 @@
     </author>
     <homepage>http://gladcode.ru</homepage>
     <version>1.1</version>
+    <dirname>ar</dirname>
     <requires>
         <alto>
             <version>1.0.6</version>
