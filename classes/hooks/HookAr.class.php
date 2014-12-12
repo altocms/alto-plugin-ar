@@ -57,7 +57,7 @@ class PluginAr_HookAr extends Hook {
             $oLocalViewer = $this->Viewer_GetLocalViewer();
             $oLocalViewer->Assign('login', Router::GetActionEvent());
 
-            return $oLocalViewer->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'social.invited.inject.tpl');
+            return $oLocalViewer->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'tpls/social.invited.inject.tpl');
         }
 
 
@@ -74,7 +74,7 @@ class PluginAr_HookAr extends Hook {
             /** @var ModuleViewer $oLocalViewer */
             $oLocalViewer = $this->Viewer_GetLocalViewer();
             $oLocalViewer->Assign('sTopicId', $oTopic->getId());
-            return $oLocalViewer->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'social.repost.in.group.inject.tpl');
+            return $oLocalViewer->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'tpls/social.repost.in.group.inject.tpl');
         }
 
 
@@ -103,7 +103,7 @@ class PluginAr_HookAr extends Hook {
             if ($oProvider) {
                 $oLocalViewer->Assign('sAuthUrl', $oProvider->sAuthUrl);
                 $oLocalViewer->Assign('sProviderName', $sProviderName);
-                $sMenu .= $oLocalViewer->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'social.buttons.inject.tpl');
+                $sMenu .= $oLocalViewer->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'tpls/social.buttons.inject.tpl');
             }
         }
 
@@ -120,7 +120,7 @@ class PluginAr_HookAr extends Hook {
             $oLocalViewer->Assign('sMenuSubItemSelect', 'social');
         }
 
-        return $oLocalViewer->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'social.profile.inject.tpl');
+        return $oLocalViewer->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'tpls/social.profile.inject.tpl');
     }
 
     /**
@@ -144,7 +144,7 @@ class PluginAr_HookAr extends Hook {
         /** @var ModuleViewer $oLocalViewer */
         $oLocalViewer = $this->Viewer_GetLocalViewer();
         $oLocalViewer->Assign('sButtons', $this->TemplateAddProfileSocialList());
-        return $oLocalViewer->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'social.page.inject.tpl');
+        return $oLocalViewer->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'tpls/social.page.inject.tpl');
     }
 
 }

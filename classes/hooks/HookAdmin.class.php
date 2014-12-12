@@ -38,7 +38,7 @@ class PluginAr_HookAdmin extends Hook {
     public function AdminMenuInject() {
 
         if (E::IsAdmin()) {
-            return $this->Viewer_Fetch(Plugin::GetTemplatePath(__CLASS__) . 'admin.menu.social.inject.tpl');
+            return $this->Viewer_Fetch(Plugin::GetTemplatePath(__CLASS__) . 'tpls/admin.menu.social.inject.tpl');
         }
 
 

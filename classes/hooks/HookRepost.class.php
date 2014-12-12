@@ -214,7 +214,7 @@ class PluginAr_HookRepost extends Hook {
                 $oLocalViewer->Assign('wall_good', $this->Lang_Get('plugin.ar.wall_good'));
 
 
-                return $oLocalViewer->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'social.vk.inject.tpl');
+                return $oLocalViewer->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'tpls/social.vk.inject.tpl');
             }
         }
 
@@ -249,7 +249,7 @@ class PluginAr_HookRepost extends Hook {
                 $oLocalViewer->Assign('text', str_replace('"', "'", $sText));
                 $oLocalViewer->Assign('post_good', $this->Lang_Get('plugin.ar.post_good'));
 
-                return $oLocalViewer->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'social.vk.inject.post.tpl');
+                return $oLocalViewer->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'tpls/social.vk.inject.post.tpl');
             }
         }
 

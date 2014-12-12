@@ -233,8 +233,8 @@
 
                         <br/><br/>
 
-                        <input type="submit" name="submit_social" value="{$aLang.plugin.ar.save}" />
-                        <input type="submit" name="cancel" value="{$aLang.plugin.ar.cancel}"/>
+                        <input type="submit" name="submit_social" value="{$aLang.plugin.ar.save}" class="btn btn-primary" />
+                        <input type="submit" name="cancel" value="{$aLang.plugin.ar.cancel}" class="btn btn-default"/>
 
                     </form>
                 </div>
