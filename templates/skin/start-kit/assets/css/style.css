@@ -1,0 +1,32 @@
+/*!
+ * style.css
+ * Файл стилей плагина Ar
+ *
+ * @author      Андрей Г. Воронов <andreyv@gladcode.ru>
+ * @copyrights  Copyright © 2014, Андрей Г. Воронов
+ *              Является частью плагина Ar
+ * @version     0.0.1 от 30.07.2014 21:11
+ */
+
+.auth-provider-logo { line-height: 24px !important; margin-right: 4px;}
+.auth-provider-logo:hover, .auth-provider-logo a:hover { background-color: transparent !important; border-color: transparent !important;}
+.auth-provider-logo a { padding: 0 !important; display: inline-block; border-radius: 4px;}
+.auth-provider-logo img { width: 24px; }
+
+#auth-form .tooltip-inner { width: 280px !important; }
+
+table.social-list { width: 100% }
+table.social-list td { border-top: 0 !important; padding: 4px !important; vertical-align: middle !important;}
+table.social-list td a { text-decoration: none;}
+table.social-list .repost-no { color: #d3d3d3; }
+table.social-list .social-logo { width: 24px; }
+table.social-list .social-logo img { width: 24px; }
+
+.settings-social { padding: 0; list-style: none; margin: 0 0 0 4px; }
+.settings-social li { display: inline-block; }
+.settings-social li a:hover, .settings-social li:hover { background-color: transparent !important; }
+
+#modal-auth .settings-social, .light-form .settings-social { margin-bottom: 18px; }
+
+.social-form .controls > div { padding-left: 0; }
+.twc { height: 42px; }

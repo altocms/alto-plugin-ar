@@ -1,0 +1,1 @@
+<h2>{$aLang.plugin.ar.about}</h2>
