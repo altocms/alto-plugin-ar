@@ -130,7 +130,7 @@ class PluginAr_HookAr extends Hook {
      */
     public function TemplateAddProfileSocialList() {
 
-        $this->Session_Set('return_path', Config::Get('path.root.web') . $_SERVER['REQUEST_URI']);
+        $this->Session_Set('return_path', Router::GetPathWebCurrent());
 
         return '<ul class="settings-social">' . $this->GetSocialIcons() . '</ul>';
     }
