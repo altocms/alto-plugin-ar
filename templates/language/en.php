@@ -24,6 +24,7 @@ return array(
     'cancel'                    => 'To undo',
     'admin_registration_only'   => 'Use registration only no functions repost',
     'admin_auto_login'          => 'Form login automatically (otherwise it will be requested from the user)',
+    'express'                   => 'Express registration',
     'error_code_1'              => 'Do not specify the application ID of the provider "%%provider_name%%"',
     'error_code_2'              => 'Not specified secret authorization code for the provider "%%provider_name%%"',
     'error_code_3'              => 'Authorization provider "%%provider_name%% ` failed try again',

@@ -57,6 +57,21 @@
                             </div>
                         </div>
 
+
+                        {* ЭКСПРЕСС *}
+                        <div class="control-group">
+                            <div class="controls">
+                                <label>
+                                    <input type="checkbox"
+                                           id="express"
+                                           name="express"
+                                           value="1"
+                                           {if $_aRequest.express}checked="checked"{/if}>
+                                    {$aLang.plugin.ar.express}
+                                </label>
+                            </div>
+                        </div>
+
                         {* ТОЛЬКО РЕГИСТРАЦИЯ *}
                         <div class="control-group">
                             <div class="controls">

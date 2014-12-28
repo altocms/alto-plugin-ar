@@ -72,6 +72,7 @@ class PluginAr_ActionAdmin extends PluginAr_Inherit_ActionAdmin {
             $aData['plugin.ar.default_text_type_text'] = getRequest('default_text_type_text', 'Мой новый топик: {link}');
             $aData['plugin.ar.auto_login'] = getRequest('auto_login', FALSE);
             $aData['plugin.ar.registration_only'] = getRequest('registration_only', FALSE);
+            $aData['plugin.ar.express'] = getRequest('express', FALSE);
 
             // Запишем настройки в хранилище
             Config::WriteCustomConfig($aData);
@@ -103,6 +104,7 @@ class PluginAr_ActionAdmin extends PluginAr_Inherit_ActionAdmin {
             $_REQUEST['default_text_type_text'] = $aData['plugin.ar.default_text_type_text'];
             $_REQUEST['auto_login'] = $aData['plugin.ar.auto_login'];
             $_REQUEST['registration_only'] = $aData['plugin.ar.registration_only'];
+            $_REQUEST['express'] = $aData['plugin.ar.express'];
 
             return FALSE;
         }
@@ -137,6 +139,7 @@ class PluginAr_ActionAdmin extends PluginAr_Inherit_ActionAdmin {
         $_REQUEST['default_text_type_text'] = Config::Get('plugin.ar.default_text_type_text');
         $_REQUEST['auto_login'] = Config::Get('plugin.ar.auto_login');
         $_REQUEST['registration_only'] = Config::Get('plugin.ar.registration_only');
+        $_REQUEST['express'] = Config::Get('plugin.ar.express');
 
         return FALSE;
         

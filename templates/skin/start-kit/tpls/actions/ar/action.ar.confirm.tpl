@@ -42,7 +42,7 @@
             <form id="auth-form" action="{router page='auth'}confirm" method="post" class="js-form-auth">
                 {hook run='form_auth_begin'}
 
-                {if Config::Get('plugin.ar.auto_login') == FALSE}
+                {if Config::Get('plugin.ar.auto_login') == FALSE && Config::Get('plugin.ar.express') == FALSE}
                     <div class="form-group has-feedback">
                         <div class="input-group">
                             <label for="input-auth-login" class="input-group-addon"><i class="glyphicon glyphicon-user"></i></label>

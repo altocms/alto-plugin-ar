@@ -65,6 +65,7 @@ class VkProvider extends AuthProvider {
         $oToken = Engine::GetEntity('PluginAr_ModuleAuthProvider_EntityUserToken', array(
             'token_provider_name'    => $this->sName,
             'token_data'             => $aData->access_token,
+            'token_email'            => @$aData->email,
             'token_expire'           => intval($aData->expires_in),
             'token_provider_user_id' => $aData->user_id,
         ));
@@ -116,7 +117,7 @@ class VkProvider extends AuthProvider {
             'data_about'         => @$oData->status,
             'data_page'          => @$oData->domain,
             'data_birthday'      => date('Y-m-d H:i:s', strtotime(@$oData->bdate)),
-            'data_mail'          => @$oData->mail,
+            'data_mail'          => @$oToken->getTokenEmail(),
             'data_photo'         => @$oData->photo_big,
         ));
 

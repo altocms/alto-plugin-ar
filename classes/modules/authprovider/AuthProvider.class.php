@@ -204,6 +204,53 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
     }
 
     /**
+     * Возвращает автоматически сформированный логин пользователя
+     *
+     * @param PluginAr_ModuleAuthProvider_EntityData $oUserData
+     * @return string
+     */
+    public function GetAutoLogin($oUserData) {
+
+        $sLogin = FALSE;
+        if ($oUserData->getDataName() && $oUserData->getDataSurname()) {
+            $sLogin = $oUserData->getDataName() . Config::Get('plugin.ar.express_comma') . $oUserData->getDataSurname();
+        }
+        if ($oUserData->getDataName() && !$oUserData->getDataSurname()) {
+            $sLogin = $oUserData->getDataName();
+        }
+        if (!$oUserData->getDataName() && $oUserData->getDataSurname()) {
+            $sLogin = $oUserData->getDataSurname();
+        }
+        if (!$oUserData->getDataName() && !$oUserData->getDataSurname()) {
+            return md5($oUserData->getDataLogin());
+        }
+
+        /** @var string $sValidateRegexp Регулярка валидации по логину */
+        $sValidateRegexp = '/^['
+            . Config::Get('module.user.login.charset') . ']{'
+            . Config::Get('module.user.login.min_size') . ','
+            . Config::Get('module.user.login.max_size') . '}$/i';
+
+        // Проверим логин на допустимые символы, если нет, то переводим в транслит
+        if (!preg_match($sValidateRegexp, $sLogin)) {
+            $sLogin = F::Translit($sLogin);
+        }
+        // Ещё раз, если всё равно нет, то заменим "плохие символы" на подчеркивание
+        if (!preg_match($sValidateRegexp, $sLogin)) {
+            $sLogin = preg_replace('~([^'. Config::Get('module.user.login.charset') .'])~i', '_', $sLogin);
+        }
+        // Если, почему-то, всё равно не подходит логин, тогда уходим в стандартную регистрацию
+        if (!preg_match($sValidateRegexp, $sLogin)) {
+            return md5($oUserData->getDataLogin());
+        }
+        if ($this->User_GetUserByLogin($sLogin)) {
+            return substr(md5($oUserData->getDataLogin()), 0, Config::Get('module.user.login.max_size'));
+        }
+
+        return $sLogin;
+    }
+
+    /**
      * Создает и возвращает нового пользователя по данным от провайдера
      *
      * @param PluginAr_ModuleAuthProvider_EntityData $oUserData
@@ -256,12 +303,7 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
             'user_activate_key'  => NULL,
         ));
 
-        // Тут два варианта, либо пользователь сам придумал логин, либо он автоматичский
-        // Логин создавался автоматически и содержит идентфикаторы социалок,
-        // уберем. что бы не светить ими
-        if (($oUserData->getDataLogin() != getRequest('login')) || Config::Get('plugin.ar.auto_login') == TRUE) {
-            $oUser->setUserLogin(md5($oUserData->getDataLogin()));
-        }
+        $oUser->setUserLogin($oUserData->getDataLogin());
 
         if ($this->User_Add($oUser)) {
 

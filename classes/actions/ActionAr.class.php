@@ -657,61 +657,145 @@ class PluginAr_ActionAr extends Action {
         Router::Location($this->_ReturnPath());
     }
 
+    /**
+     * Стандартная регистрация с запросом данных у пользователя
+     *
+     * @param PluginAr_ModuleAuthProvider_EntityData $oUserData
+     * @param PluginAr_ModuleAuthProvider_EntityUserToken$oToken
+     * @return bool
+     */
+    protected function StandardRegistration($oUserData, $oToken) {
+
+        // Нажата кнопка создания пользователя
+        if (getRequest('create-new-user', FALSE)) {
+
+            $oUserData->setDataMail(getRequest('mail', FALSE));
+            if (Config::Get('plugin.ar.auto_login') == FALSE && Config::Get('plugin.ar.express') == FALSE){
+                $oUserData->setDataLogin(getRequest('login', FALSE));
+            } else {
+                $sLogin = $this->PluginAr_AuthProvider_GetAutoLogin($oUserData);
+                $oUserData->setDataLogin($sLogin);
+            }
+
+            /** @var ModuleUser_EntityUser|int $oUser */
+            if (($oUser = $this->PluginAr_AuthProvider_CreateNewUserByUserData($oUserData)) && !is_int($oUser)) {
+                $oToken->setTokenUserId($oUser->getId());
+                $oToken->Add();
+                $this->_AuthUser($oUser);
+            } else {
+                if (is_int($oUser)) {
+                    $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.error_create_user_' . $oUser), NULL, TRUE);
+                } else {
+                    $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.error_create_user'), NULL, TRUE);
+                }
+
+            }
+
+            $this->Session_Drop('sUserData');
+            $this->Session_Drop('sTokenData');
+
+            Router::Location($this->_ReturnPath());
+
+            return FALSE;
+        }
+
+        // Страничка с подтверждением регистрации
+        $this->SetTemplateAction('confirm.tpl');
+
+        $_REQUEST['login'] = $oUserData->getDataLogin();
+        $_REQUEST['email'] = $oUserData->getDataMail();
+        $_REQUEST['return_path'] = $this->_ReturnPath();
+
+        return FALSE;
+
+    }
+
+    /**
+     * Экспресс-регистрация
+     *
+     * @param PluginAr_ModuleAuthProvider_EntityData $oUserData
+     * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     * @return bool
+     */
+    protected function ExpressRegistration($oUserData, $oToken) {
+
+        /**
+         * Проверим логин
+         * Логика похожая. Если логин не валиден - уходим на страницу стандартной регистрации
+         * иначе проверяем на присутствие в бд. Если есть, то уходим.
+         */
+        /** @var string $sLogin Логин пользователя */
+        $sLogin = $this->PluginAr_AuthProvider_GetAutoLogin($oUserData);
+        $oUserData->setDataLogin($sLogin);
+
+        /**
+         * Проверим email
+         * Логика такая: если email по каким-то параметрам не подходит, то переходим
+         * на процедуру стандартной регистрации пользователя
+         */
+        // Его просто нет
+        /** @var string $sEmail */
+        if (!($sEmail = $oUserData->getDataMail())) {
+            return $this->StandardRegistration($oUserData, $oToken);
+        }
+
+        // Он НЕ валидный
+        if (!F::CheckVal($sEmail, 'mail')) {
+            return $this->StandardRegistration($oUserData, $oToken);
+        }
+
+        // Уже занят?
+        if ($this->User_GetUserByMail($sEmail)) {
+            return $this->StandardRegistration($oUserData, $oToken);
+        }
+
+
+        // Вот здесь у нас есть валидные логин и email. Будем создаваться
+        /** @var ModuleUser_EntityUser|int $oUser */
+        if (($oUser = $this->PluginAr_AuthProvider_CreateNewUserByUserData($oUserData)) && !is_int($oUser)) {
+            $oToken->setTokenUserId($oUser->getId());
+            $oToken->Add();
+            $this->_AuthUser($oUser);
+        } else {
+            if (is_int($oUser)) {
+                $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.error_create_user_' . $oUser), NULL, TRUE);
+            } else {
+                $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.error_create_user'), NULL, TRUE);
+            }
+
+        }
+
+        $this->Session_Drop('sUserData');
+        $this->Session_Drop('sTokenData');
+
+        Router::Location($this->_ReturnPath());
+
+        return FALSE;
+
+    }
+
+    /**
+     * Страница подтверждения регистрации
+     *
+     * @return bool|string
+     */
     protected function EventConfirm() {
 
         $sUserData = $this->Session_Get('sUserData');
         $sTokenData = $this->Session_Get('sTokenData');
 
         if ($sUserData && $sTokenData) {
+
             /** @var PluginAr_ModuleAuthProvider_EntityData $oUserData */
             $oUserData = unserialize($sUserData);
             /** @var PluginAr_ModuleAuthProvider_EntityUserToken $oToken */
             $oToken = unserialize($sTokenData);
 
-
-            // Нажата кнопка создания пользователя
-            if (getRequest('create-new-user', FALSE)) {
-
-                $oUserData->setDataMail(getRequest('mail', FALSE));
-                if (Config::Get('plugin.ar.auto_login') == FALSE){
-                    $oUserData->setDataLogin(getRequest('login', FALSE));
-                }
-
-                /** @var ModuleUser_EntityUser|int $oUser */
-
-                if (($oUser = $this->PluginAr_AuthProvider_CreateNewUserByUserData($oUserData)) && !is_int($oUser)) {
-                    $oToken->setTokenUserId($oUser->getId());
-                    $oToken->Add();
-                    $this->_AuthUser($oUser);
-                } else {
-                    if (is_int($oUser)) {
-                        $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.error_create_user_' . $oUser), NULL, TRUE);
-                    } else {
-                        $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.error_create_user'), NULL, TRUE);
-                    }
-
-                }
-
-                $this->Session_Drop('sUserData');
-                $this->Session_Drop('sTokenData');
-
-//                if ($oUser && is_null($oUser->setUserDateActivate())) {
-//                    return Router::Location(Router::GetPath('registration') . 'confirm/');
-//                }
-
-                Router::Location($this->_ReturnPath());
-
-                return FALSE;
+            if (Config::Get('plugin.ar.express') && !getRequest('create-new-user', FALSE)) {
+                return $this->ExpressRegistration($oUserData, $oToken);
+            } else {
+                return $this->StandardRegistration($oUserData, $oToken);
             }
-
-            // Страничка с подтверждением регистрации
-            $this->SetTemplateAction('confirm.tpl');
-
-            $_REQUEST['login'] = $oUserData->getDataLogin();
-            $_REQUEST['email'] = $oUserData->getDataMail();
-            $_REQUEST['return_path'] = $this->_ReturnPath();
-
-            return FALSE;
         }
 
         $this->Session_Drop('sUserData');

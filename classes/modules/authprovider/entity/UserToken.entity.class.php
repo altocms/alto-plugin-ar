@@ -42,4 +42,21 @@ class PluginAr_ModuleAuthProvider_EntityUserToken extends EntityORM {
     public function getUserByTokenUserId($iUserId) {
         return $this->User_GetUserById($iUserId);
     }
+
+    /**
+     * Специально для вконтакта, который email отдает в токене, а не в
+     * дополнительных данный
+     */
+    public function getKeyProps() {
+        unset($this->_aData['token_email']);
+        return parent::getKeyProps();
+    }
+
+    public function getValProps() {
+        unset($this->_aData['token_email']);
+        return parent::getValProps();
+    }
+
+
+
 }
