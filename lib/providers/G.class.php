@@ -56,7 +56,10 @@ class GProvider extends AuthProvider {
 
         return Engine::GetEntity('PluginAr_ModuleAuthProvider_EntityData', array(
             'data_provider_name' => $this->sName,
-            'data_login'         => $this->sName . '_' . $oData->id,
+            // В идентификаторе от гугла могут содержаться символы, которые не
+            // разрешены в логине пользователя, потому будем брать хэш от этого
+            // значения и, чтобы уж наверняка, с примесью рандомной строки.
+            'data_login'         => $this->sName . '_' . F::TruncateText(F::DoHashe($oData->id + F::RandomStr()), 20),
             'data_name'          => @$oData->given_name,
             'data_surname'       => @$oData->family_name,
             'data_sex'           => 'other',
