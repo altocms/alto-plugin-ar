@@ -65,7 +65,7 @@ class PluginAr_HookAr extends Hook {
 
 
     public function TemplateAddRepostInGroupLink($aData) {
-        if (!E::IsAdmin()) {
+        if (!(E::IsAdmin() && !Config::Get('plugin.ar.registration_only') && Config::Get('plugin.ar.providers.fb.fb_group_id'))) {
             return;
         }
 
