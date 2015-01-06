@@ -684,7 +684,16 @@ class PluginAr_ActionAr extends Action {
                 $this->_AuthUser($oUser);
             } else {
                 if (is_int($oUser)) {
-                    $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.error_create_user_' . $oUser), NULL, TRUE);
+
+                    $sErrorText = $this->Lang_Get('plugin.ar.error_create_user_' . $oUser) . '<br>';
+                    switch ($oUser) {
+                        case 1: $sErrorText .= "Login: {$oUserData->getDataLogin()}"; break;
+                        case 2: $sErrorText .= "Login: {$oUserData->getDataLogin()}"; break;
+                        case 3: $sErrorText .= "Email: {$oUserData->getDataMail()}"; break;
+                        case 4: $sErrorText .= "Email: {$oUserData->getDataMail()}"; break;
+                    }
+
+                    $this->Message_AddErrorSingle($sErrorText, NULL, TRUE);
                 } else {
                     $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.error_create_user'), NULL, TRUE);
                 }
