@@ -308,7 +308,7 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
         if ($this->User_Add($oUser)) {
 
             $sDateActivate = date("Y-m-d H:i:s");
-            if (Config::Get('general.reg.activation') == TRUE) {
+            if (Config::Get('general.reg.activation') == TRUE && !Config::Get('plugin.ar.express')) {
                 $sDateActivate = NULL;
                 $oUser->setActivateKey(F::RandomStr());
                 $this->Notify_SendRegistrationActivate($oUser, $sPassword);

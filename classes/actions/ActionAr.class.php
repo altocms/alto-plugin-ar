@@ -848,7 +848,7 @@ class PluginAr_ActionAr extends Action {
      */
     private function _AuthUser(ModuleUser_EntityUser $oUser) {
 
-        if (Config::Get('general.reg.activation') == TRUE) {
+        if (Config::Get('general.reg.activation') == TRUE && !Config::Get('plugin.ar.express')) {
             // Нужна активация пользователя
             if (!E::User() && $oUser && $oUser->getUserActivate()) {
                 $this->User_Authorization($oUser);
