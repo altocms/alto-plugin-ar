@@ -329,7 +329,7 @@ abstract class AuthProvider {
         $this->sAuthUrl = $this->EvalUrl($this->sAuthUrl);
 
         if ($this->iVersion == 1) {
-            $this->sAuthUrl = Config::Get('path.root.web') . 'auth/1/' . $this->sName;
+            $this->sAuthUrl = Config::Get('path.root.web') . '/auth/1/' . $this->sName;
         }
 
     }
@@ -429,7 +429,7 @@ abstract class AuthProvider {
         }
 
 
-        if (@$aData->error || !@$aData->access_token) {
+        if (isset($aData->error) || !isset($aData->access_token)) {
             $this->setLastErrorCode(3);
 
             return FALSE;
