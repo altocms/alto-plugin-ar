@@ -175,8 +175,8 @@ class TwProvider extends AuthProvider {
         }
 
 
-        if (@$aData->errors) {
-            if (!(@$aData->oauth_token || (is_array($aData) && isset($aData[0])))) {
+        if (isset($aData->error)) {
+            if (!(isset($aData->oauth_token) || (is_array($aData) && isset($aData[0])))) {
                 $this->setLastErrorCode(3);
 
                 return FALSE;
