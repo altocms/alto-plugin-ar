@@ -30,7 +30,7 @@ class PluginAr_ModuleUploader extends PluginAr_Inherit_ModuleUploader {
         return $sExtension;
     }
 
-    protected function _checkUploadedFile($sFile) {
+    protected function _checkUploadedFile($sFile, $sConfigKey = 'default') {
 
         $sExtension = $this->GetExtension($sFile);
 
