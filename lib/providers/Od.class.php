@@ -107,7 +107,7 @@ class OdProvider extends AuthProvider {
             'data_sex'           => ((@$oData->gender == 'male') ? 'man' : ($oData->gender == 'female' ? 'woman' : 'other')),
             'data_about'         => @$oData->current_status ? @$oData->current_status : '',
             'data_page'          => $oData->uid,
-            'data_birthday'      => date('Y-m-d H:i:s', strtotime(@$oData->birthday)),
+            'data_birthday'      => @$oData->birthday ? date('Y-m-d H:i:s', strtotime(@$oData->birthday)) : null,
             'data_mail'          => '',
             'data_photo'         => @$oData->photo_id ? $oData->pic_2 : '',
         ));

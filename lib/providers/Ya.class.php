@@ -68,7 +68,7 @@ class YaProvider extends AuthProvider {
             'data_sex'           => ((@$oData->sex == 'male') ? 'man' : ($oData->sex == 'female' ? 'woman' : 'other')),
             'data_about'         => '',
             'data_page'          => '',
-            'data_birthday'      => date('Y-m-d H:i:s', strtotime(@$oData->birthday)),
+            'data_birthday'      => @$oData->birthday ? date('Y-m-d H:i:s', strtotime(@$oData->birthday)) : null,
             'data_mail'          => @$oData->default_email,
             'data_photo'         => '',
         ));

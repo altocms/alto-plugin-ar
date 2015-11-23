@@ -90,7 +90,7 @@ class LiProvider extends AuthProvider {
             'data_sex'           => 'other',
             'data_about'         => '',
             'data_page'          => $oData->id,
-            'data_birthday'      => '',
+            'data_birthday'      => null,
             'data_mail'          => @$oData->emailAddress,
             'data_photo'         => @$oData->pictureUrl,
         ));

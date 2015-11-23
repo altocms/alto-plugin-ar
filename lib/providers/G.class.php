@@ -65,7 +65,7 @@ class GProvider extends AuthProvider {
             'data_sex'           => 'other',
             'data_about'         => '',
             'data_page'          => $oData->id,
-            'data_birthday'      => '',
+            'data_birthday'      => null,
             'data_mail'          => @$oData->email,
             'data_photo'         => @$oData->picture,
         ));

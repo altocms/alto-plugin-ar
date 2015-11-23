@@ -90,7 +90,7 @@ class IProvider extends AuthProvider {
             'data_sex'           => 'other',
             'data_about'         => @$oData->bio,
             'data_page'          => $oData->username,
-            'data_birthday'      => '',
+            'data_birthday'      => null,
             'data_mail'          => '',
             'data_photo'         => @$oData->profile_picture,
         ));

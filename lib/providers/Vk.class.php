@@ -116,7 +116,7 @@ class VkProvider extends AuthProvider {
             'data_sex'           => ((@$oData->sex && $oData->sex > 0) ? ($oData->sex == 1 ? 'woman' : 'man') : 'other'),
             'data_about'         => @$oData->status,
             'data_page'          => @$oData->domain,
-            'data_birthday'      => date('Y-m-d H:i:s', strtotime(@$oData->bdate)),
+            'data_birthday'      => @$oData->bdate ? date('Y-m-d H:i:s', strtotime(@$oData->bdate)) : null,
             'data_mail'          => @$oToken->getTokenEmail(),
             'data_photo'         => @$oData->photo_big,
         ));

@@ -250,7 +250,7 @@ class TwProvider extends AuthProvider {
                 'data_sex'           => '',
                 'data_about'         => '',
                 'data_page'          => $aData->screen_name,
-                'data_birthday'      => '',
+                'data_birthday'      => null,
                 'data_mail'          => '',
                 'data_photo'         => '',
             ));

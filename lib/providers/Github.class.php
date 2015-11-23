@@ -87,7 +87,7 @@ class GithubProvider extends AuthProvider {
             'data_sex'           => 'other',
             'data_about'         => $oData->bio,
             'data_page'          => $oData->login,
-            'data_birthday'      => '',
+            'data_birthday'      => null,
             'data_mail'          => @$oData->email,
             'data_photo'         => @$oData->avatar_url,
         ));

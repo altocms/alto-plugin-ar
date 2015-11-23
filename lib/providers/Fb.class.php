@@ -168,7 +168,12 @@ class FbProvider extends AuthProvider {
         /**
          * Получили дополнительные данные. Заполним профиль из того, что есть
          */
-
+        if (@$oData->birthday) {
+            list($month,$date,$year) = sscanf(@$oData->birthday, "%d/%d/%d");
+            $sDate = "{$year}-{$month}-{$date} 00:00:00";
+        } else {
+            $sDate = null;
+        }
         return Engine::GetEntity('PluginAr_ModuleAuthProvider_EntityData', array(
             'data_provider_name' => $this->sName,
             'data_login'         => $this->sName . '_' . $oData->id,
@@ -177,7 +182,7 @@ class FbProvider extends AuthProvider {
             'data_sex'           => ((@$oData->gender == 'male') ? 'man' : ($oData->gender == 'female' ? 'woman' : 'other')),
             'data_about'         => @$oData->bio ? @$oData->bio : '',
             'data_page'          => @$oData->id,
-            'data_birthday'      => date('Y-m-d H:i:s', strtotime(@$oData->birthday)),
+            'data_birthday'      => $sDate,
             'data_mail'          => @$oData->email,
             'data_photo'         => "https://graph.facebook.com/{$oData->id}/picture?type=large",
         ));

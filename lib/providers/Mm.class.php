@@ -239,7 +239,7 @@ class MmProvider extends AuthProvider {
             'data_sex'           => ((@$oData->sex == '0') ? 'man' : ($oData->sex == '1' ? 'woman' : 'other')),
             'data_about'         => @$oData->status_text ? @$oData->status_text : '',
             'data_page'          => str_replace('/', '', str_replace('http://my.mail.ru/mail/', '', $oData->link)),
-            'data_birthday'      => date('Y-m-d H:i:s', strtotime(@$oData->birthday)),
+            'data_birthday'      => @$oData->birthday ? date('Y-m-d H:i:s', strtotime(@$oData->birthday)) : null,
             'data_mail'          => @$oData->email,
             'data_photo' => @$oData->has_pic ? @$oData->pic_big : '',
         ));
