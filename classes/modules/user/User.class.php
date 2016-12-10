@@ -16,9 +16,11 @@
  * @author      Андрей Г. Воронов <andreyv@gladcode.ru>
  * @copyrights  Copyright © 2014, Андрей Г. Воронов
  *              Является частью плагина Ar
- * @version     0.0.1 от 01.08.2014 13:48
  */
-class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
+class PluginAr_ModuleUser extends PluginAr_Inherits_ModuleUser {
+
+    /** @var  PluginAr_ModuleUser_MapperUser */
+    protected $oMapper;
 
     public function UploadAvatar($sFile, $oUser, $aSize = array()) {
 
@@ -26,7 +28,7 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
             return FALSE;
         }
         if (!$aSize) {
-            $oImg = $this->Img_CropSquare($sFile, TRUE);
+            $oImg = E::Module('Img')->CropSquare($sFile, TRUE);
         } else {
             if (!isset($aSize['w'])) {
                 $aSize['w'] = $aSize['x2'] - $aSize['x1'];
@@ -34,10 +36,10 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
             if (!isset($aSize['h'])) {
                 $aSize['h'] = $aSize['y2'] - $aSize['y1'];
             }
-            $oImg = $this->Img_Crop($sFile, $aSize['w'], $aSize['h'], $aSize['x1'], $aSize['y1']);
+            $oImg = E::Module('Img')->Crop($sFile, $aSize['w'], $aSize['h'], $aSize['x1'], $aSize['y1']);
         }
 //        $sExtension = strtolower(pathinfo($sFile, PATHINFO_EXTENSION));
-        $sExtension = $this->Uploader_GetExtension($sFile);
+        $sExtension = E::Module('Uploader')->GetExtension($sFile);
 
         $sName = pathinfo($sFile, PATHINFO_FILENAME);
 
@@ -45,20 +47,20 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
         if ($sTmpFile = $oImg->Save(F::File_UploadUniqname($sExtension))) {
 
             // Файл, куда будет записан аватар
-            $sAvatar = $this->Uploader_GetUserAvatarDir($oUser->GetId()) . $sName . '.' . $sExtension;
+            $sAvatar = E::Module('Uploader')->GetUserAvatarDir($oUser->GetId()) . $sName . '.' . $sExtension;
 
             // Окончательная запись файла только через модуль Uploader
-            if ($xStoredFile = $this->Uploader_Store($sTmpFile, $sAvatar)) {
+            if ($xStoredFile = E::Module('Uploader')->Store($sTmpFile, $sAvatar)) {
                 if (is_object($xStoredFile)) {
                     return $xStoredFile->GetUrl();
                 } else {
-                    return $this->Uploader_Dir2Url($xStoredFile);
+                    return E::Module('Uploader')->Dir2Url($xStoredFile);
                 }
             }
         }
 
         // * В случае ошибки, возвращаем false
-        $this->Message_AddErrorSingle($this->Lang_Get('system_error'));
+        E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('system_error'));
 
         return FALSE;
     }
@@ -75,7 +77,7 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
         }
 
         /** @var PluginAr_ModuleAuthProvider_EntityUserToken[] $oResult */
-        $oResult = $this->PluginAr_AuthProvider_GetUserTokenItemsByFilter(array(
+        $oResult = E::Module('PluginAr\AuthProvider')->GetUserTokenItemsByFilter(array(
             'token_user_id' => E::UserId(),
             '#order'        => array('token_provider_name' => 'ASC')
         ));
@@ -96,7 +98,7 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
         }
 
         /** @var PluginAr_ModuleAuthProvider_EntityUserToken[] $oResult */
-        $oResult = $this->PluginAr_AuthProvider_GetUserTokenItemsByFilter(array(
+        $oResult = E::Module('PluginAr\AuthProvider')->GetUserTokenItemsByFilter(array(
             'token_user_id' => E::UserId(),
             'token_id'      => $iTokenId,
         ));
@@ -106,21 +108,20 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
         }
 
         return FALSE;
-
     }
-
 
     /**
      * Получение параметров репоста пользователя
      * @return bool|mixed
      */
     public function GetCurrentUserRepostSettings() {
+
         if (!E::IsUser()) {
             return FALSE;
         }
 
         /** @var PluginAr_ModuleAuthProvider_EntityUserToken[] $oResult */
-        $oResult = $this->PluginAr_AuthProvider_GetRepostSettingItemsByFilter(array(
+        $oResult = E::Module('PluginAr\AuthProvider')->GetRepostSettingItemsByFilter(array(
             'setting_user_id' => E::UserId(),
         ));
 
@@ -143,12 +144,13 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
      * @return string $sSettingType
      */
     public function GetCurrentUserRepostSettingsByType($sSettingType) {
+
         if (!E::IsUser()) {
             return FALSE;
         }
 
         /** @var PluginAr_ModuleAuthProvider_EntityUserToken[] $oResult */
-        $oResult = $this->PluginAr_AuthProvider_GetRepostSettingItemsByFilter(array(
+        $oResult = E::Module('PluginAr\AuthProvider')->GetRepostSettingItemsByFilter(array(
             'setting_user_id' => E::UserId(),
             'setting_type_id' => $sSettingType,
             'setting_value'   => 1,
@@ -172,13 +174,13 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
      * @param string $sProviderName
      */
     public function RemoveCurrentUserSettings($sProviderName) {
+
         if (!E::IsUser()) {
             return;
         }
 
-
         /** @var PluginAr_ModuleAuthProvider_EntityRepostSetting[] $oResult */
-        $oResult = $this->PluginAr_AuthProvider_GetUserTokenItemsByFilter(array(
+        $oResult = E::Module('PluginAr\AuthProvider')->GetUserTokenItemsByFilter(array(
             'token_user_id'       => E::UserId(),
             'token_provider_name' => $sProviderName,
         ));
@@ -186,7 +188,7 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
             $aTokenId = array_keys($oResult);
 
             /** @var PluginAr_ModuleAuthProvider_EntityRepostSetting[] $oResult */
-            $oResult = $this->PluginAr_AuthProvider_GetRepostSettingItemsBySettingTokenIdIn($aTokenId);
+            $oResult = E::Module('PluginAr\AuthProvider')->GetRepostSettingItemsBySettingTokenIdIn($aTokenId);
 
             if ($oResult) {
                 /** @var PluginAr_ModuleAuthProvider_EntityRepostSetting $oSetting */
@@ -205,13 +207,13 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
      * @param int $iTokenId
      */
     public function RemoveCurrentUserSettingsByTokenId($iTokenId) {
+
         if (!E::IsUser()) {
             return;
         }
 
-
         /** @var PluginAr_ModuleAuthProvider_EntityRepostSetting[] $oResult */
-        $oResult = $this->PluginAr_AuthProvider_GetRepostSettingItemsBySettingTokenId($iTokenId);
+        $oResult = E::Module('PluginAr\AuthProvider')->GetRepostSettingItemsBySettingTokenId($iTokenId);
 
         if ($oResult) {
             /** @var PluginAr_ModuleAuthProvider_EntityRepostSetting $oSetting */
@@ -219,18 +221,23 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
                 $oSetting->Delete();
             }
         }
-
-
         return;
     }
 
+    /**
+     * @param $sTokenProviderId
+     * @param $sRepostType
+     *
+     * @return bool
+     */
     public function ToggleRepostSetting($sTokenProviderId, $sRepostType) {
+
         if (!E::IsUser()) {
             return FALSE;
         }
 
         /** @var PluginAr_ModuleAuthProvider_EntityRepostSetting[] $oResult */
-        $oResult = $this->PluginAr_AuthProvider_GetRepostSettingItemsByFilter(array(
+        $oResult = E::Module('PluginAr\AuthProvider')->GetRepostSettingItemsByFilter(array(
             'setting_user_id'  => E::UserId(),
             'setting_token_id' => $sTokenProviderId,
             'setting_type_id'  => $sRepostType,
@@ -265,15 +272,17 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
     /**
      * Получение параметров репоста пользователя
      * @param $sType
+     *
      * @return bool|mixed
      */
     public function GetCurrentUserText($sType) {
+
         if (!E::IsUser()) {
             return FALSE;
         }
 
         /** @var PluginAr_ModuleAuthProvider_EntityUserToken[] $oResult */
-        $oResult = $this->PluginAr_AuthProvider_GetTextItemsByFilter(array(
+        $oResult = E::Module('PluginAr\AuthProvider')->GetTextItemsByFilter(array(
             'text_user_id' => E::UserId(),
             'text_type_id' => $sType,
         ));
@@ -284,7 +293,6 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
             return $oResult->getTextData();
 
         }
-
         return Config::Get('plugin.ar.default_text_type_text');
     }
 
@@ -293,15 +301,17 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
      *
      * @param $sType
      * @param $sText
-     * @return mixed
+     *
+     * @return bool
      */
     public function SetCurrentUserText($sType, $sText) {
+
         if (!E::IsUser()) {
             return FALSE;
         }
 
         /** @var PluginAr_ModuleAuthProvider_EntityUserToken[] $oResult */
-        $oResult = $this->PluginAr_AuthProvider_GetTextItemsByFilter(array(
+        $oResult = E::Module('PluginAr\AuthProvider')->GetTextItemsByFilter(array(
             'text_user_id' => E::UserId(),
             'text_type_id' => $sType,
         ));
@@ -331,11 +341,13 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
      *
      * @param string $sNewFriendSocialId
      * @param AuthProvider $oProvider
+     *
      * @return bool|ModuleUser_EntityUser
      */
     public function GetUserBySocialId($sNewFriendSocialId, $oProvider) {
+
         /** @var PluginAr_ModuleAuthProvider_EntityUserToken|array $oResult */
-        $oResult = $this->PluginAr_AuthProvider_GetUserTokenItemsByFilter(array(
+        $oResult = E::Module('PluginAr\AuthProvider')->GetUserTokenItemsByFilter(array(
             'token_provider_user_id' => $sNewFriendSocialId,
             'token_provider_name'    => $oProvider->sName,
         ));
@@ -352,25 +364,28 @@ class PluginAr_ModuleUser extends PluginAr_Inherit_ModuleUser {
     /**
      * Получает список друзей
      *
-     * @param  int $nUserId     ID пользователя
-     * @param  int $iPage       Номер страницы
-     * @param  int $iPerPage    Количество элементов на страницу
+     * @param  int $iUserId  ID пользователя
+     * @param  int $iPage    Номер страницы
+     * @param  int $iPerPage Количество элементов на страницу
      *
      * @return array
      */
-    public function GetUsersInvitedFriend($nUserId, $iPage = 1, $iPerPage = 10) {
+    public function GetUsersInvitedFriend($iUserId, $iPage = 1, $iPerPage = 10) {
 
-        $sCacheKey = "user_friend_{$nUserId}_{$iPage}_{$iPerPage}";
-        if (false === ($data = $this->Cache_Get($sCacheKey))) {
+        $sCacheKey = "user_friend_{$iUserId}_{$iPage}_{$iPerPage}";
+        if (false === ($data = E::Module('Cache')->Get($sCacheKey))) {
             $data = array(
-                'collection' => $this->oMapper->GetUsersInvitedFriend($nUserId, $iCount, $iPage, $iPerPage),
+                'collection' => $this->oMapper->GetUsersInvitedFriend($iUserId, $iCount, $iPage, $iPerPage),
                 'count'      => $iCount
             );
-            $this->Cache_Set($data, $sCacheKey, array("friend_change_user_{$nUserId}"), 'P2D');
+            E::Module('Cache')->Set($data, $sCacheKey, array("friend_change_user_{$iUserId}"), 'P2D');
         }
         if ($data['collection']) {
             $data['collection'] = $this->GetUsersAdditionalData($data['collection']);
         }
         return $data;
     }
+
 }
+
+// EOF

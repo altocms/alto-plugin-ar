@@ -16,7 +16,6 @@
  * @author      Андрей Г. Воронов <andreyv@gladcode.ru>
  * @copyrights  Copyright © 2014, Андрей Г. Воронов
  *              Является частью плагина Ar
- * @version     0.0.1 от 31.07.2014 2:15
  *
  *
  * @method string getDataProviderName
@@ -43,5 +42,6 @@
  */
 class PluginAr_ModuleAuthProvider_EntityData extends Entity {
 
-
 }
+
+// EOF

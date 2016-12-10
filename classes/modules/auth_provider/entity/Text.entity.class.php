@@ -16,14 +16,18 @@
  * @author      Андрей Г. Воронов <andreyv@gladcode.ru>
  * @copyrights  Copyright © 2014, Андрей Г. Воронов
  *              Является частью плагина Ar
- * @version     0.0.1 от 31.07.2014 2:48
  */
 class PluginAr_ModuleAuthProvider_EntityText extends EntityORM {
+
     protected $aRelations = array(
         'user' => array(EntityORM::RELATION_TYPE_BELONGS_TO, 'ModuleUser_EntityUser', 'text_user_id'),
     );
 
     public function getUserByTokenUserId($iUserId) {
-        return $this->User_GetUserById($iUserId);
+
+        return E::Module('User')->GetUserById($iUserId);
     }
+
 }
+
+// EOF

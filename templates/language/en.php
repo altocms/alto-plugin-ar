@@ -6,7 +6,6 @@
  * @author      Андрей Г. Воронов <andreyv@gladcode.ru>
  * @copyrights  Copyright © 2014, Андрей Г. Воронов
  *              Является частью плагина Ar
- * @version     0.0.1 от 30.07.2014 21:11
  */
 
 return array(
@@ -92,3 +91,5 @@ return array(
     'error_create_user_4'       => 'The specified e-mail address is already in use most likely you have already registered',
 
 );
+
+// EOF

@@ -70,6 +70,9 @@
 
 Версии
 ------
+###1.2.6
+    - Оптимизация под Alto CMS версии 1.1.х
+
 ###1.2.5
     - Исправлена ошибка Exception: Class «PluginAr_ModuleAuthProvider» при работе с Alto CMS версии 1.1.19.х
 

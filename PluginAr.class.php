@@ -26,9 +26,7 @@ if (!class_exists('Plugin')) {
  * @method void Viewer_AppendScript
  * @method void Viewer_Assign
  *
- * @version     0.0.1 от 30.07.2014 21:04
  */
-
 class PluginAr extends Plugin {
 
     /** @var array $aDelegates Объявление делегирований */
@@ -57,8 +55,9 @@ class PluginAr extends Plugin {
      * @return bool
      */
     public function Activate() {
+
         if (!$this->isTableExists('prefix_user_token')) {
-            $this->ExportSQL(dirname(__FILE__) . '/sql/install.sql');
+            $this->ExportSQL(__DIR__ . '/install/db/init.sql');
         }
         return TRUE;
     }
@@ -68,6 +67,7 @@ class PluginAr extends Plugin {
      * @return bool
      */
     public function Deactivate() {
+
         return TRUE;
     }
 
@@ -75,9 +75,14 @@ class PluginAr extends Plugin {
      * Инициализация плагина
      */
     public function Init() {
-        $this->Viewer_AppendStyle(Plugin::GetTemplatePath(__CLASS__) . 'assets/css/style.css'); // Добавление своего CSS
-        $this->Viewer_AppendScript(Plugin::GetTemplatePath(__CLASS__) . 'assets/js/script.js'); // Добавление своего JS
-        $this->Viewer_AppendScript('http://vkontakte.ru/js/api/openapi.js'); // API Вконтакта
+
+        E::Module('Viewer')->AppendStyle(Plugin::GetTemplatePath(__CLASS__) . 'assets/css/style.css'); // Добавление своего CSS
+        E::Module('Viewer')->AppendScript(Plugin::GetTemplatePath(__CLASS__) . 'assets/js/script.js'); // Добавление своего JS
+        E::Module('Viewer')->AppendScript('http://vkontakte.ru/js/api/openapi.js'); // API Вконтакта
+
+        return TRUE;
     }
 
 }
+
+// EOF

@@ -5,7 +5,7 @@
 // Если вы не собираетесь разрабатывать класс нового провайдера - удалите этот файл
 die();
 
-require_once __DIR__ . "/../AuthProvider.class.php";
+require_once __DIR__ . '../lib/AuthProvider.class.php';
 
 class ExampleProvider extends AuthProvider {
 

@@ -16,9 +16,8 @@
  * @author      Андрей Г. Воронов <andreyv@gladcode.ru>
  * @copyrights  Copyright © 2014, Андрей Г. Воронов
  *              Является частью плагина Ar
- * @version     0.0.1 от 09.08.14 17:40
  */
-class PluginAr_ModuleUser_MapperUser extends PluginAr_Inherit_ModuleUser_MapperUser {
+class PluginAr_ModuleUser_MapperUser extends PluginAr_Inherits_ModuleUser_MapperUser {
 
     /**
      * Получает список друзей
@@ -67,7 +66,10 @@ class PluginAr_ModuleUser_MapperUser extends PluginAr_Inherit_ModuleUser_MapperU
             }
         }
         rsort($aUsers, SORT_NUMERIC);
+
         return array_unique($aUsers);
     }
 
 }
+
+// EOF

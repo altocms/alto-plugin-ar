@@ -15,10 +15,9 @@
  *
  * @author      Андрей Г. Воронов <andreyv@gladcode.ru>
  * @copyrights  Copyright © 2014, Андрей Г. Воронов
- *              Является частью плагина ab
- * @version     0.0.1 от 19.07.2014 09:17
+ *              Является частью плагина Ar
  */
-class PluginAr_ActionAdmin extends PluginAr_Inherit_ActionAdmin {
+class PluginAr_ActionAdmin extends PluginAr_Inherits_ActionAdmin {
 
     /**
      * Регистрация экшенов админки
@@ -28,7 +27,6 @@ class PluginAr_ActionAdmin extends PluginAr_Inherit_ActionAdmin {
         parent::RegisterEvent();
 
         $this->AddEvent('social-list', 'EventAdminSocialList');
-
     }
 
     /**
@@ -38,41 +36,41 @@ class PluginAr_ActionAdmin extends PluginAr_Inherit_ActionAdmin {
      */
     protected function EventAdminSocialList() {
 
-        $this->Viewer_Assign('sPageTitle', $this->Lang_Get('plugin.ar.admin_social_page_title'));
-        $this->Viewer_Assign('sMainMenuItem', 'content');
-        $this->Viewer_AddHtmlTitle($this->Lang_Get('plugin.ar.admin_social_page_title'));
+        E::Module('Viewer')->Assign('sPageTitle', E::Module('Lang')->Get('plugin.ar.admin_social_page_title'));
+        E::Module('Viewer')->Assign('sMainMenuItem', 'content');
+        E::Module('Viewer')->AddHtmlTitle(E::Module('Lang')->Get('plugin.ar.admin_social_page_title'));
 
         // Если нажата кнопка отправки формы настроек
         if (getRequest('submit_social')) {
 
             // Составим массив данных для записи в хранилище
-            $aData['plugin.ar.providers.od.od_secret_key'] = getRequest('od_secret_key', FALSE);
-            $aData['plugin.ar.providers.od.od_client_id'] = getRequest('od_client_id', FALSE);
-            $aData['plugin.ar.providers.od.od_public_key'] = getRequest('od_public_key', FALSE);
-            $aData['plugin.ar.providers.fb.fb_secret_key'] = getRequest('fb_secret_key', FALSE);
-            $aData['plugin.ar.providers.fb.fb_client_id'] = getRequest('fb_client_id', FALSE);
-            $aData['plugin.ar.providers.fb.fb_group_id'] = getRequest('fb_group_id', FALSE);
-            $aData['plugin.ar.providers.github.github_secret_key'] = getRequest('github_secret_key', FALSE);
-            $aData['plugin.ar.providers.github.github_client_id'] = getRequest('github_client_id', FALSE);
-            $aData['plugin.ar.providers.github.application_name'] = getRequest('application_name', FALSE);
-            $aData['plugin.ar.providers.vk.vk_client_id'] = getRequest('vk_client_id', FALSE);
-            $aData['plugin.ar.providers.vk.vk_secret_key'] = getRequest('vk_secret_key', FALSE);
-            $aData['plugin.ar.providers.tw.tw_client_id'] = getRequest('tw_client_id', FALSE);
-            $aData['plugin.ar.providers.tw.tw_secret_key'] = getRequest('tw_secret_key', FALSE);
-            $aData['plugin.ar.providers.mm.mm_client_id'] = getRequest('mm_client_id', FALSE);
-            $aData['plugin.ar.providers.mm.mm_secret_key'] = getRequest('mm_secret_key', FALSE);
-            $aData['plugin.ar.providers.ya.ya_client_id'] = getRequest('ya_client_id', FALSE);
-            $aData['plugin.ar.providers.ya.ya_secret_key'] = getRequest('ya_secret_key', FALSE);
-            $aData['plugin.ar.providers.g.g_client_id'] = getRequest('g_client_id', FALSE);
-            $aData['plugin.ar.providers.g.g_secret_key'] = getRequest('g_secret_key', FALSE);
-            $aData['plugin.ar.providers.li.li_client_id'] = getRequest('li_client_id', FALSE);
-            $aData['plugin.ar.providers.li.li_secret_key'] = getRequest('li_secret_key', FALSE);
-            $aData['plugin.ar.providers.i.i_client_id'] = getRequest('i_client_id', FALSE);
-            $aData['plugin.ar.providers.i.i_secret_key'] = getRequest('i_secret_key', FALSE);
-            $aData['plugin.ar.default_text_type_text'] = getRequest('default_text_type_text', 'Мой новый топик: {link}');
-            $aData['plugin.ar.auto_login'] = getRequest('auto_login', FALSE);
-            $aData['plugin.ar.registration_only'] = getRequest('registration_only', FALSE);
-            $aData['plugin.ar.express'] = getRequest('express', FALSE);
+            $aData['plugin.ar.providers.od.od_secret_key'] = F::GetRequest('od_secret_key', FALSE);
+            $aData['plugin.ar.providers.od.od_client_id'] = F::GetRequest('od_client_id', FALSE);
+            $aData['plugin.ar.providers.od.od_public_key'] = F::GetRequest('od_public_key', FALSE);
+            $aData['plugin.ar.providers.fb.fb_secret_key'] = F::GetRequest('fb_secret_key', FALSE);
+            $aData['plugin.ar.providers.fb.fb_client_id'] = F::GetRequest('fb_client_id', FALSE);
+            $aData['plugin.ar.providers.fb.fb_group_id'] = F::GetRequest('fb_group_id', FALSE);
+            $aData['plugin.ar.providers.github.github_secret_key'] = F::GetRequest('github_secret_key', FALSE);
+            $aData['plugin.ar.providers.github.github_client_id'] = F::GetRequest('github_client_id', FALSE);
+            $aData['plugin.ar.providers.github.application_name'] = F::GetRequest('application_name', FALSE);
+            $aData['plugin.ar.providers.vk.vk_client_id'] = F::GetRequest('vk_client_id', FALSE);
+            $aData['plugin.ar.providers.vk.vk_secret_key'] = F::GetRequest('vk_secret_key', FALSE);
+            $aData['plugin.ar.providers.tw.tw_client_id'] = F::GetRequest('tw_client_id', FALSE);
+            $aData['plugin.ar.providers.tw.tw_secret_key'] = F::GetRequest('tw_secret_key', FALSE);
+            $aData['plugin.ar.providers.mm.mm_client_id'] = F::GetRequest('mm_client_id', FALSE);
+            $aData['plugin.ar.providers.mm.mm_secret_key'] = F::GetRequest('mm_secret_key', FALSE);
+            $aData['plugin.ar.providers.ya.ya_client_id'] = F::GetRequest('ya_client_id', FALSE);
+            $aData['plugin.ar.providers.ya.ya_secret_key'] = F::GetRequest('ya_secret_key', FALSE);
+            $aData['plugin.ar.providers.g.g_client_id'] = F::GetRequest('g_client_id', FALSE);
+            $aData['plugin.ar.providers.g.g_secret_key'] = F::GetRequest('g_secret_key', FALSE);
+            $aData['plugin.ar.providers.li.li_client_id'] = F::GetRequest('li_client_id', FALSE);
+            $aData['plugin.ar.providers.li.li_secret_key'] = F::GetRequest('li_secret_key', FALSE);
+            $aData['plugin.ar.providers.i.i_client_id'] = F::GetRequest('i_client_id', FALSE);
+            $aData['plugin.ar.providers.i.i_secret_key'] = F::GetRequest('i_secret_key', FALSE);
+            $aData['plugin.ar.default_text_type_text'] = F::GetRequest('default_text_type_text', 'Мой новый топик: {link}');
+            $aData['plugin.ar.auto_login'] = F::GetRequest('auto_login', FALSE);
+            $aData['plugin.ar.registration_only'] = F::GetRequest('registration_only', FALSE);
+            $aData['plugin.ar.express'] = F::GetRequest('express', FALSE);
 
             // Запишем настройки в хранилище
             Config::WriteCustomConfig($aData);
@@ -142,8 +140,8 @@ class PluginAr_ActionAdmin extends PluginAr_Inherit_ActionAdmin {
         $_REQUEST['express'] = Config::Get('plugin.ar.express');
 
         return FALSE;
-        
     }
 
-
 }
+
+// EOF

@@ -35,8 +35,6 @@
  * @method PluginAr_AuthProvider_GetProvidersByTokenIdArray
  * @method User_GetCurrentUserRepostSettingsByType
  * @method Topic_GetTopicById
- *
- * @version     0.0.1 от 30.07.2014 23:43
  */
 class PluginAr_ActionAr extends Action {
 
@@ -46,7 +44,7 @@ class PluginAr_ActionAr extends Action {
     public function Init() {
 
 //        // Только авторизованные пользователи рабоатбт с этим экшеном
-//        if ($this->User_IsAuthorization()) {
+//        if (E::Module('User')->IsAuthorization()) {
 //            return $this->_NotFound();
 //        }
 //
@@ -89,7 +87,6 @@ class PluginAr_ActionAr extends Action {
 
         // Поиск друзей из социальных сетей по сайту
         $this->AddEvent('find', 'EventFindFriends');
-
     }
 
 
@@ -101,6 +98,7 @@ class PluginAr_ActionAr extends Action {
      * Обработка добавления в друзья
      *
      * @param  ModuleUser_EntityUser $oUser
+     *
      * @return bool
      */
     protected function SubmitAddFriend($oUser) {
@@ -118,10 +116,10 @@ class PluginAr_ActionAr extends Action {
         $oFriendNew->setStatusTo(ModuleUser::USER_FRIEND_NULL);
 
         // Добавляем друга
-        if ($this->User_AddFriend($oFriendNew)) {
+        if (E::Module('User')->AddFriend($oFriendNew)) {
 
             // Сформируем заголовок письма
-            $sTitle = $this->Lang_Get(
+            $sTitle = E::Module('Lang')->Get(
                 'user_friend_offer_title',
                 array(
                     'login'  => E::User()->getLogin(),
@@ -135,7 +133,7 @@ class PluginAr_ActionAr extends Action {
             $sCode = rawurlencode(base64_encode(xxtea_encrypt($sCode, Config::Get('module.talk.encrypt'))));
 
             // Сам текст письма
-            $sText = $this->Lang_Get(
+            $sText = E::Module('Lang')->Get(
                 'user_friend_offer_text',
                 array(
                     'login'       => E::User()->getLogin(),
@@ -147,16 +145,16 @@ class PluginAr_ActionAr extends Action {
 
             // Отправим по внутренней почте
             /** @var ModuleTalk_EntityTalk $oTalk */
-            $oTalk = $this->Talk_SendTalk($sTitle, $sText, E::User(), array($oUser), FALSE, FALSE);
+            $oTalk = E::Module('Talk')->SendTalk($sTitle, $sText, E::User(), array($oUser), FALSE, FALSE);
 
             // По почте тоже отправим
-            $this->Notify_SendUserFriendNew($oUser, E::User(), '', Router::GetPath('talk') . 'read/' . $oTalk->getId() . '/');
+            E::Module('Notify')->SendUserFriendNew($oUser, E::User(), '', Router::GetPath('talk') . 'read/' . $oTalk->getId() . '/');
 
             // Удаляем отправляющего юзера из переписки
-            $this->Talk_DeleteTalkUserByArray($oTalk->getId(), E::UserId());
+            E::Module('Talk')->DeleteTalkUserByArray($oTalk->getId(), E::UserId());
 
             // Подписываемся на запрашивающего дружбу
-            $this->Stream_SubscribeUser(E::UserId(), $oUser->getId());
+            E::Module('Stream')->SubscribeUser(E::UserId(), $oUser->getId());
 
             return TRUE;
         }
@@ -169,9 +167,11 @@ class PluginAr_ActionAr extends Action {
      *
      * @param ModuleUser_EntityUser[] $aFriendsId
      * @param AuthProvider            $oProvider
+     *
      * @return \ModuleUser_EntityUser[]
      */
     private function AddFriends($aFriendsId, $oProvider) {
+
         /** @var ModuleUser_EntityUser[] $aNewFriends Массив новых друзей */
         $aNewFriends = array();
 
@@ -179,13 +179,13 @@ class PluginAr_ActionAr extends Action {
 
             // а это кто ещё такой?
             /** @var ModuleUser_EntityUser $oUser */
-            if (!$oUser = $this->User_GetUserBySocialId($iNewFriendSocialId, $oProvider)) continue;
+            if (!$oUser = E::Module('User')->GetUserBySocialId($iNewFriendSocialId, $oProvider)) continue;
 
             // Себя не добавляем
             if ($oUser->getId() == E::UserId()) continue;
 
             // В каких мы с ним отношениях?
-            if (!$oFriendState = $this->User_GetFriend($oUser->getId(), E::UserId())) {
+            if (!$oFriendState = E::Module('User')->GetFriend($oUser->getId(), E::UserId())) {
                 if ($bResult = $this->SubmitAddFriend($oUser)) {
                     $aNewFriends[] = $oUser;
                 }
@@ -200,30 +200,31 @@ class PluginAr_ActionAr extends Action {
      * Установка тектовок
      */
     protected function EventFindFriends() {
-        $this->Viewer_SetResponseAjax('json');
+
+        E::Module('Viewer')->SetResponseAjax('json');
 
         if (!E::IsUser()) {
-            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.friends_find_error'));
+            E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.friends_find_error'));
 
             return FALSE;
         }
 
         // Параметры репоста
-        $sTokenId = getRequest('token_id', FALSE);
+        $sTokenId = F::GetRequest('token_id', FALSE);
 
 
         /** @var PluginAr_ModuleAuthProvider_EntityUserToken $oToken */
-        if ($oToken = $this->User_GetCurrentUserTokenById($sTokenId)) {
+        if ($oToken = E::Module('User')->GetCurrentUserTokenById($sTokenId)) {
 
             // Ищем только по своему токену
             if ($oToken->getTokenUserId() != E::UserId()) {
-                $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.friends_find_error'));
+                E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.friends_find_error'));
 
                 return FALSE;
             }
 
             // а не слишком ли часто пользователь друзей ищет
-            $aResult = $this->PluginAr_AuthProvider_GetSearchedUserItemsByFilter(array(
+            $aResult = E::Module('PluginAr\AuthProvider')->GetSearchedUserItemsByFilter(array(
                 'searched_token_id' => $sTokenId,
                 '#order' => array('searched_time' => 'desc'),
                 '#limit' => 1,
@@ -232,14 +233,14 @@ class PluginAr_ActionAr extends Action {
             if ($aResult) {
                 $oSearchLast = array_shift($aResult);
                 if ($oSearchLast->getSearchedTime() + Config::Get('plugin.ar.friends_search_limit') > time() ) {
-                    $this->Message_AddNoticeSingle($this->Lang_Get('plugin.ar.friends_find_no', array('social_name', $this->Lang_Get('plugin.ar.' . $oToken->getTokenProviderName()))));
+                    E::Module('Message')->AddNoticeSingle(E::Module('Lang')->Get('plugin.ar.friends_find_no', array('social_name', E::Module('Lang')->Get('plugin.ar.' . $oToken->getTokenProviderName()))));
 
                     return FALSE;
                 }
             }
 
             // Поищем и, наверное даже найдем
-            $aProviders = $this->PluginAr_AuthProvider_GetProvidersByTokenIdArray(array($oToken->getTokenId()));
+            $aProviders = E::Module('PluginAr\AuthProvider')->GetProvidersByTokenIdArray(array($oToken->getTokenId()));
             if ($aProviders) {
                 /** @var AuthProvider $oProvider */
                 $oProvider = array_shift($aProviders);
@@ -251,31 +252,30 @@ class PluginAr_ActionAr extends Action {
                     /** @var ModuleUser_EntityUser[] $aNewFriends */
                     $aNewFriends = $this->AddFriends($aFriendsId, $oProvider);
 
-                    $this->PluginAr_AuthProvider_AddSearchedFriends($aNewFriends, $oToken);
+                    E::Module('PluginAr\AuthProvider')->AddSearchedFriends($aNewFriends, $oToken);
 
                     // Сколько уже было приглашенных?
                     /** @var array|PluginAr_ModuleAuthProvider_EntityUserToken $oResult */
-                    $iFriendsCount = $this->PluginAr_AuthProvider_GetCountSearchedFriendsByTokenId($oToken->getTokenId());
+                    $iFriendsCount = E::Module('PluginAr\AuthProvider')->GetCountSearchedFriendsByTokenId($oToken->getTokenId());
                     $iFriendsCount += count($aNewFriends);
 
                     // Определим, что показываем ползователю
                     if (count($aNewFriends)>0) {
-                        $this->Message_AddNoticeSingle($this->Lang_Get('plugin.ar.friends_find', array('social_name', $this->Lang_Get('plugin.ar.' . $oToken->getTokenProviderName()))));
+                        E::Module('Message')->AddNoticeSingle(E::Module('Lang')->Get('plugin.ar.friends_find', array('social_name', E::Module('Lang')->Get('plugin.ar.' . $oToken->getTokenProviderName()))));
                     } else {
-                        $this->Message_AddNoticeSingle($this->Lang_Get('plugin.ar.friends_find_no', array('social_name', $this->Lang_Get('plugin.ar.' . $oToken->getTokenProviderName()))));
+                        E::Module('Message')->AddNoticeSingle(E::Module('Lang')->Get('plugin.ar.friends_find_no', array('social_name', E::Module('Lang')->Get('plugin.ar.' . $oToken->getTokenProviderName()))));
                     }
 
-                    $this->Viewer_AssignAjax('count', $iFriendsCount);
+                    E::Module('Viewer')->AssignAjax('count', $iFriendsCount);
 
                     return FALSE;
                 }
 
-                $this->Message_AddNoticeSingle($this->Lang_Get('plugin.ar.friends_find_no', array('social_name', $this->Lang_Get('plugin.ar.' . $oToken->getTokenProviderName()))));
+                E::Module('Message')->AddNoticeSingle(E::Module('Lang')->Get('plugin.ar.friends_find_no', array('social_name', E::Module('Lang')->Get('plugin.ar.' . $oToken->getTokenProviderName()))));
             }
 
-            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.friends_find_error'));
+            E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.friends_find_error'));
         }
-
 
         return FALSE;
     }
@@ -287,34 +287,35 @@ class PluginAr_ActionAr extends Action {
      * @return bool
      */
     protected function EventRepostInGroup() {
-        $this->Viewer_SetResponseAjax('json');
+
+        E::Module('Viewer')->SetResponseAjax('json');
 
         if (!(E::IsUser() && E::IsAdmin())) {
-            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.repost_error_in_group'));
+            E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.repost_error_in_group'));
 
             return FALSE;
         }
 
         // Параметры репоста
-        $sTopicId = getRequest('topic_id', FALSE);
+        $sTopicId = F::GetRequest('topic_id', FALSE);
         /** @var ModuleTopic_EntityTopic $oTopic */
-        $oTopic = $this->Topic_GetTopicById($sTopicId);
+        $oTopic = E::Module('Topic')->GetTopicById($sTopicId);
 
         if (!$oTopic) {
-            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.repost_error_in_group'));
+            E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.repost_error_in_group'));
 
             return FALSE;
         }
 
 
         /** @var AuthProvider $oProvider */
-        if ($oProviders = $this->PluginAr_AuthProvider_GetProviders()) {
+        if ($oProviders = E::Module('PluginAr\AuthProvider')->GetProviders()) {
 
             // Провайдеров для репоста статуса получили, теперь дело за малым -
             // публикнуть по всем провайдерам
             foreach ($oProviders as $oProvider) {
                 if ($oProvider->aRepostRights['group'] == TRUE) {
-                    $aToken = $this->PluginAr_AuthProvider_GetTokensByProviderName($oProvider->sName);
+                    $aToken = E::Module('PluginAr\AuthProvider')->GetTokensByProviderName($oProvider->sName);
                     if ($aToken) {
                         foreach ($aToken as $oToken) {
                             $oProvider->PostInGroup($oTopic, $oToken);
@@ -325,7 +326,7 @@ class PluginAr_ActionAr extends Action {
 
         }
 
-        $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.repost_in_group_good'));
+        E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.repost_in_group_good'));
 
         return FALSE;
     }
@@ -334,17 +335,18 @@ class PluginAr_ActionAr extends Action {
      * Установка тектовок
      */
     protected function EventText() {
-        $this->Viewer_SetResponseAjax('json');
+
+        E::Module('Viewer')->SetResponseAjax('json');
 
         if (!E::IsUser()) {
-            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.repost_error_text'));
+            E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.repost_error_text'));
 
             return FALSE;
         }
 
         // Параметры репоста
-        $sType = getRequest('text_type', FALSE);
-        $sVal = getRequest('text_val', FALSE);
+        $sType = F::GetRequest('text_type', FALSE);
+        $sVal = F::GetRequest('text_val', FALSE);
 
         if (!in_array($sType, array('topic'))) {
             $sType = 'topic';
@@ -352,61 +354,63 @@ class PluginAr_ActionAr extends Action {
 
         // Проверяем их
         if (!($sType && $sVal)) {
-            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.repost_error_text'));
+            E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.repost_error_text'));
 
             return FALSE;
         }
 
         if (mb_strlen($sVal, 'utf-8')< 2) {
-            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.repost_error_text_short'));
+            E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.repost_error_text_short'));
 
             return FALSE;
         }
 
         if (mb_strpos($sVal, '{link}') === false) {
-            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.repost_error_text_no'));
+            E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.repost_error_text_no'));
 
             return FALSE;
         }
 
-        if ($this->User_SetCurrentUserText($sType, $sVal)) {
-            $this->Message_AddNoticeSingle($this->Lang_Get('plugin.ar.repost_text_good'));
+        if (E::Module('User')->SetCurrentUserText($sType, $sVal)) {
+            E::Module('Message')->AddNoticeSingle(E::Module('Lang')->Get('plugin.ar.repost_text_good'));
             return TRUE;
         };
 
-        $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.repost_error'));
+        E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.repost_error'));
 
         return FALSE;
     }
+
     /**
      * Переключение параметров репоста
      */
     protected function EventToggleRepost() {
-        $this->Viewer_SetResponseAjax('json');
+
+        E::Module('Viewer')->SetResponseAjax('json');
 
         if (!E::IsUser()) {
-            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.repost_error'));
+            E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.repost_error'));
 
             return FALSE;
         }
 
         // Параметры репоста
-        $sTokenProviderId = getRequest('id', FALSE);
-        $sRepostType = getRequest('type', FALSE);
+        $sTokenProviderId = F::GetRequest('id', FALSE);
+        $sRepostType = F::GetRequest('type', FALSE);
 
         // Проверяем их
         if (!($sTokenProviderId && $sRepostType)) {
-            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.repost_error'));
+            E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.repost_error'));
 
             return FALSE;
         }
 
-        if ($this->User_ToggleRepostSetting($sTokenProviderId, $sRepostType)) {
-            $this->Message_AddNoticeSingle($this->Lang_Get('plugin.ar.repost_good'));
+        if (E::Module('User')->ToggleRepostSetting($sTokenProviderId, $sRepostType)) {
+            E::Module('Message')->AddNoticeSingle(E::Module('Lang')->Get('plugin.ar.repost_good'));
             return TRUE;
         };
 
-        $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.repost_error'));
+        E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.repost_error'));
 
         return FALSE;
     }
@@ -415,23 +419,23 @@ class PluginAr_ActionAr extends Action {
      * Удаление связи с социальной сетью
      */
     protected function EventRemoveSocial() {
-        $this->Viewer_SetResponseAjax('json');
 
-        $iTokenId = getRequest('token_id', FALSE);
+        E::Module('Viewer')->SetResponseAjax('json');
+
+        $iTokenId = F::GetRequest('token_id', FALSE);
 
         /** @var PluginAr_ModuleAuthProvider_EntityUserToken $oToken */
-        if ($oToken = $this->User_GetCurrentUserTokenById($iTokenId)) {
+        if ($oToken = E::Module('User')->GetCurrentUserTokenById($iTokenId)) {
             // Удалим настройки по токену
-            $this->User_RemoveCurrentUserSettingsByTokenId($iTokenId);
+            E::Module('User')->RemoveCurrentUserSettingsByTokenId($iTokenId);
             // А затем и сам токен
             $oToken->Delete();
-            $this->Viewer_AssignAjax('sid', '.' . 'sid-' . $oToken->getTokenProviderName());
-            $this->Message_AddNoticeSingle($this->Lang_Get('plugin.ar.removed', array('social_name', $this->Lang_Get('plugin.ar.' . $oToken->getTokenProviderName()))));
+            E::Module('Viewer')->AssignAjax('sid', '.' . 'sid-' . $oToken->getTokenProviderName());
+            E::Module('Message')->AddNoticeSingle(E::Module('Lang')->Get('plugin.ar.removed', array('social_name', E::Module('Lang')->Get('plugin.ar.' . $oToken->getTokenProviderName()))));
 
         } else {
-            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.not_removed'));
+            E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.not_removed'));
         }
-
     }
 
     /**
@@ -454,7 +458,7 @@ class PluginAr_ActionAr extends Action {
         $sProviderName = Router::GetActionEvent();
 
         /** @var AuthProvider $oProvider Текущий провайдер */
-        if (!($sProviderName && $oProvider = $this->PluginAr_AuthProvider_GetProviderByName($sProviderName))) {
+        if (!($sProviderName && $oProvider = E::Module('PluginAr\AuthProvider')->GetProviderByName($sProviderName))) {
             return $this->_NotFound();
         }
 
@@ -478,11 +482,12 @@ class PluginAr_ActionAr extends Action {
      * @return bool
      */
     protected function EventAuthVersion1Init() {
+
         /** @var string $sProviderName Наименование провайдера авторизации */
         $sProviderName = Router::GetParam('0');
 
         /** @var AuthProvider $oProvider Текущий провайдер */
-        if (!($sProviderName && $oProvider = $this->PluginAr_AuthProvider_GetProviderByName($sProviderName))) {
+        if (!($sProviderName && $oProvider = E::Module('PluginAr\AuthProvider')->GetProviderByName($sProviderName))) {
             return $this->_NotFound();
         }
 
@@ -493,15 +498,15 @@ class PluginAr_ActionAr extends Action {
         }
 
 
-        if ($oToken->getTokenProviderUserId() && $oUser = $this->PluginAr_AuthProvider_GetUserByToken($oToken)) {
+        if ($oToken->getTokenProviderUserId() && $oUser = E::Module('PluginAr\AuthProvider')->GetUserByToken($oToken)) {
             $this->_AuthUser($oUser);
-            $sReturnPath = $this->Session_Get('return_path');
+            $sReturnPath = E::Module('Session')->Get('return_path');
             Router::Location($sReturnPath ? $sReturnPath : '');
 
         } else {
-            $this->Session_Set('tw_token', $oToken->getTokenData());
-            $this->Session_Set('tw_token_secret', $oToken->getTokenDataSecret());
-            $this->Session_Set('provider_name', $oToken->getTokenProviderName());
+            E::Module('Session')->Set('tw_token', $oToken->getTokenData());
+            E::Module('Session')->Set('tw_token_secret', $oToken->getTokenDataSecret());
+            E::Module('Session')->Set('provider_name', $oToken->getTokenProviderName());
             $oProvider->sUserInfoUrl = $oProvider->EvalUrl($oProvider->sUserInfoUrl, array('%%token%%' => $oToken->getTokenData()));
             Router::Location($oProvider->sUserInfoUrl);
         }
@@ -518,11 +523,12 @@ class PluginAr_ActionAr extends Action {
      * @param AuthProvider $oProvider
      */
     protected function EventAuth1($oProvider) {
-        $sReturnPath = $this->Session_Get('return_path');
+
+        $sReturnPath = E::Module('Session')->Get('return_path');
 
         // Токен есть
         /** @var PluginAr_ModuleAuthProvider_EntityUserToken $oToken */
-        $oToken = $this->PluginAr_AuthProvider_GetTokenFromSession();
+        $oToken = E::Module('PluginAr\AuthProvider')->GetTokenFromSession();
         if (!$oToken) {
             Router::Location($sReturnPath ? $sReturnPath : '');
 
@@ -530,7 +536,7 @@ class PluginAr_ActionAr extends Action {
         }
 
         // Провайдер есть
-        if (!$oProviderTmp = $this->PluginAr_AuthProvider_GetProviderByName($oToken->getTokenProviderName())) {
+        if (!$oProviderTmp = E::Module('PluginAr\AuthProvider')->GetProviderByName($oToken->getTokenProviderName())) {
             Router::Location($sReturnPath ? $sReturnPath : '');
 
             return;
@@ -555,11 +561,13 @@ class PluginAr_ActionAr extends Action {
      * и вернула на эту страниу. Тут получим токен, данные и уйдем в регистрацию
      *
      * @param AuthProvider $oProvider
+     *
      * @return bool
      */
     protected function EventAuth2($oProvider) {
+
         // Куда возвращаемся?
-        $sReturnPath = $this->Session_Get('return_path');
+        $sReturnPath = E::Module('Session')->Get('return_path');
 
         /** @var PluginAr_ModuleAuthProvider_EntityUserToken $oToken */
         $oToken = $oProvider->getToken();
@@ -571,8 +579,6 @@ class PluginAr_ActionAr extends Action {
             return TRUE;
         }
 
-
-
         // Если пользователь есть, авторизуем его и уходим. Но здесь может быть два варианта:
         // Если ид. пользователя отдается с токеном, то второй запрос не формируем, для проверки
         // пользователя хватит и одного. Если же ид. не получили, например от одноклассников, то
@@ -580,11 +586,11 @@ class PluginAr_ActionAr extends Action {
         // после получения полных данных от социальной сети
 
         // Сначала ищем пользователя по токену
-        if ($oUserFindByToken = $this->PluginAr_AuthProvider_GetUserByTokenData($oToken)) {
+        if ($oUserFindByToken = E::Module('PluginAr\AuthProvider')->GetUserByTokenData($oToken)) {
             $this->_AuthUser($oUserFindByToken);
 
         } // Теперь по идентификатору пользователя, который может быть в токене
-        elseif ($oToken->getTokenProviderUserId() && $oUser = $this->PluginAr_AuthProvider_GetUserByToken($oToken)) {
+        elseif ($oToken->getTokenProviderUserId() && $oUser = E::Module('PluginAr\AuthProvider')->GetUserByToken($oToken)) {
             // Вот и всё
             $this->_AuthUser($oUser);
 
@@ -609,7 +615,7 @@ class PluginAr_ActionAr extends Action {
      */
     protected function UserData($oProvider, $oToken) {
 
-        $sReturnPath = $this->Session_Get('return_path');
+        $sReturnPath = E::Module('Session')->Get('return_path');
 
         $oUserData = $oProvider->GetUserData($oToken);
 
@@ -617,7 +623,7 @@ class PluginAr_ActionAr extends Action {
         if ($oUserData && !$oToken->getTokenProviderUserId()) {
             $oToken->setTokenProviderUserId(str_replace($oUserData->getDataProviderName() . '_', '', $oUserData->getDataLogin()));
 
-            if ($oUser = $this->PluginAr_AuthProvider_GetUserByToken($oToken)) {
+            if ($oUser = E::Module('PluginAr\AuthProvider')->GetUserByToken($oToken)) {
                 $this->_AuthUser($oUser);
 
                 Router::Location($sReturnPath ? $sReturnPath : '');
@@ -634,7 +640,7 @@ class PluginAr_ActionAr extends Action {
         // пользователя или не стоит. Здесь уложим в сессию токен и пришедшие данные и пойдем
         // на страницу решения этой проблемы
         if (E::User()) {
-            $this->PluginAr_AuthProvider_CreateNewUserByUserData($oUserData);
+            E::Module('PluginAr\AuthProvider')->CreateNewUserByUserData($oUserData);
             $oToken->setTokenUserId(E::User()->getId());
             $oToken->Add();
         } else {
@@ -643,8 +649,8 @@ class PluginAr_ActionAr extends Action {
                 $sUserData = serialize($oUserData);
                 $sTokenData = serialize($oToken);
 
-                $this->Session_Set('sUserData', $sUserData);
-                $this->Session_Set('sTokenData', $sTokenData);
+                E::Module('Session')->Set('sUserData', $sUserData);
+                E::Module('Session')->Set('sTokenData', $sTokenData);
 
                 Router::Location('auth/confirm');
 
@@ -652,7 +658,6 @@ class PluginAr_ActionAr extends Action {
 
             }
         }
-
 
         Router::Location($this->_ReturnPath());
     }
@@ -662,6 +667,7 @@ class PluginAr_ActionAr extends Action {
      *
      * @param PluginAr_ModuleAuthProvider_EntityData $oUserData
      * @param PluginAr_ModuleAuthProvider_EntityUserToken$oToken
+     *
      * @return bool
      */
     protected function StandardRegistration($oUserData, $oToken) {
@@ -673,19 +679,19 @@ class PluginAr_ActionAr extends Action {
             if (Config::Get('plugin.ar.auto_login') == FALSE && Config::Get('plugin.ar.express') == FALSE){
                 $oUserData->setDataLogin(getRequest('login', FALSE));
             } else {
-                $sLogin = $this->PluginAr_AuthProvider_GetAutoLogin($oUserData);
+                $sLogin = E::Module('PluginAr\AuthProvider')->GetAutoLogin($oUserData);
                 $oUserData->setDataLogin($sLogin);
             }
 
             /** @var ModuleUser_EntityUser|int $oUser */
-            if (($oUser = $this->PluginAr_AuthProvider_CreateNewUserByUserData($oUserData)) && !is_int($oUser)) {
+            if (($oUser = E::Module('PluginAr\AuthProvider')->CreateNewUserByUserData($oUserData)) && !is_int($oUser)) {
                 $oToken->setTokenUserId($oUser->getId());
                 $oToken->Add();
                 $this->_AuthUser($oUser);
             } else {
                 if (is_int($oUser)) {
 
-                    $sErrorText = $this->Lang_Get('plugin.ar.error_create_user_' . $oUser) . '<br>';
+                    $sErrorText = E::Module('Lang')->Get('plugin.ar.error_create_user_' . $oUser) . '<br>';
                     switch ($oUser) {
                         case 1: $sErrorText .= "Login: {$oUserData->getDataLogin()}"; break;
                         case 2: $sErrorText .= "Login: {$oUserData->getDataLogin()}"; break;
@@ -693,15 +699,15 @@ class PluginAr_ActionAr extends Action {
                         case 4: $sErrorText .= "Email: {$oUserData->getDataMail()}"; break;
                     }
 
-                    $this->Message_AddErrorSingle($sErrorText, NULL, TRUE);
+                    E::Module('Message')->AddErrorSingle($sErrorText, NULL, TRUE);
                 } else {
-                    $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.error_create_user'), NULL, TRUE);
+                    E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.error_create_user'), NULL, TRUE);
                 }
 
             }
 
-            $this->Session_Drop('sUserData');
-            $this->Session_Drop('sTokenData');
+            E::Module('Session')->Drop('sUserData');
+            E::Module('Session')->Drop('sTokenData');
 
             Router::Location($this->_ReturnPath());
 
@@ -716,7 +722,6 @@ class PluginAr_ActionAr extends Action {
         $_REQUEST['return_path'] = $this->_ReturnPath();
 
         return FALSE;
-
     }
 
     /**
@@ -724,6 +729,7 @@ class PluginAr_ActionAr extends Action {
      *
      * @param PluginAr_ModuleAuthProvider_EntityData $oUserData
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @return bool
      */
     protected function ExpressRegistration($oUserData, $oToken) {
@@ -734,7 +740,7 @@ class PluginAr_ActionAr extends Action {
          * иначе проверяем на присутствие в бд. Если есть, то уходим.
          */
         /** @var string $sLogin Логин пользователя */
-        $sLogin = $this->PluginAr_AuthProvider_GetAutoLogin($oUserData);
+        $sLogin = E::Module('PluginAr\AuthProvider')->GetAutoLogin($oUserData);
         $oUserData->setDataLogin($sLogin);
 
         /**
@@ -754,33 +760,32 @@ class PluginAr_ActionAr extends Action {
         }
 
         // Уже занят?
-        if ($this->User_GetUserByMail($sEmail)) {
+        if (E::Module('User')->GetUserByMail($sEmail)) {
             return $this->StandardRegistration($oUserData, $oToken);
         }
 
 
         // Вот здесь у нас есть валидные логин и email. Будем создаваться
         /** @var ModuleUser_EntityUser|int $oUser */
-        if (($oUser = $this->PluginAr_AuthProvider_CreateNewUserByUserData($oUserData)) && !is_int($oUser)) {
+        if (($oUser = E::Module('PluginAr\AuthProvider')->CreateNewUserByUserData($oUserData)) && !is_int($oUser)) {
             $oToken->setTokenUserId($oUser->getId());
             $oToken->Add();
             $this->_AuthUser($oUser);
         } else {
             if (is_int($oUser)) {
-                $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.error_create_user_' . $oUser), NULL, TRUE);
+                E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.error_create_user_' . $oUser), NULL, TRUE);
             } else {
-                $this->Message_AddErrorSingle($this->Lang_Get('plugin.ar.error_create_user'), NULL, TRUE);
+                E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('plugin.ar.error_create_user'), NULL, TRUE);
             }
 
         }
 
-        $this->Session_Drop('sUserData');
-        $this->Session_Drop('sTokenData');
+        E::Module('Session')->Drop('sUserData');
+        E::Module('Session')->Drop('sTokenData');
 
         Router::Location($this->_ReturnPath());
 
         return FALSE;
-
     }
 
     /**
@@ -790,8 +795,8 @@ class PluginAr_ActionAr extends Action {
      */
     protected function EventConfirm() {
 
-        $sUserData = $this->Session_Get('sUserData');
-        $sTokenData = $this->Session_Get('sTokenData');
+        $sUserData = E::Module('Session')->Get('sUserData');
+        $sTokenData = E::Module('Session')->Get('sTokenData');
 
         if ($sUserData && $sTokenData) {
 
@@ -807,12 +812,12 @@ class PluginAr_ActionAr extends Action {
             }
         }
 
-        $this->Session_Drop('sUserData');
-        $this->Session_Drop('sTokenData');
+        E::Module('Session')->Drop('sUserData');
+        E::Module('Session')->Drop('sTokenData');
 
         return Router::Action('error');
-
     }
+
 
     protected function EventReceiver() {
 
@@ -824,18 +829,20 @@ class PluginAr_ActionAr extends Action {
     /////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private function _ReturnPath() {
-        $sReturnPath = $this->Session_Get('return_path');
+
+        $sReturnPath = E::Module('Session')->Get('return_path');
 
         return $sReturnPath ? $sReturnPath : '';
     }
 
     /**
      * Экстренное завершение экшена
+     *
      * @return string
      */
     private function  _NotFound() {
 
-        $this->Message_AddErrorSingle($this->Lang_Get('not_access'), $this->Lang_Get('error'));
+        E::Module('Message')->AddErrorSingle(E::Module('Lang')->Get('not_access'), E::Module('Lang')->Get('error'));
 
         return Router::Action('error');
     }
@@ -844,6 +851,7 @@ class PluginAr_ActionAr extends Action {
      * Авторизация пользователя
      *
      * @param ModuleUser_EntityUser $oUser
+     *
      * @return string
      */
     private function _AuthUser(ModuleUser_EntityUser $oUser) {
@@ -851,7 +859,7 @@ class PluginAr_ActionAr extends Action {
         if (Config::Get('general.reg.activation') == TRUE && !Config::Get('plugin.ar.express')) {
             // Нужна активация пользователя
             if (!E::User() && $oUser && $oUser->getUserActivate()) {
-                $this->User_Authorization($oUser);
+                E::Module('User')->Authorization($oUser);
                 Router::Location($this->_ReturnPath());
             } else {
                 Router::Location('registration/confirm');
@@ -859,10 +867,12 @@ class PluginAr_ActionAr extends Action {
         } else {
             // Не нужна активация
             if (!E::User() && $oUser) {
-                $this->User_Authorization($oUser);
+                E::Module('User')->Authorization($oUser);
                 Router::Location($this->_ReturnPath());
             }
         }
-
     }
+
 }
+
+// EOF

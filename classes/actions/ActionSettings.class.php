@@ -14,12 +14,14 @@
  *
  * @property ModuleUser_EntityUser $oUserProfile
  */
-class PluginAr_ActionSettings extends PluginAr_Inherit_ActionSettings {
+class PluginAr_ActionSettings extends PluginAr_Inherits_ActionSettings {
 
     protected function RegisterEvent() {
+
         parent::RegisterEvent();
         $this->AddEvent('social', 'EventSocial');
     }
+
 
     protected function EventSocial() {
 
@@ -27,18 +29,18 @@ class PluginAr_ActionSettings extends PluginAr_Inherit_ActionSettings {
         $this->sMenuItemSelect = 'settings';
         $this->sMenuSubItemSelect = 'social';
 
-        $aProviders = $this->PluginAr_AuthProvider_GetProviders();
+        $aProviders = E::Module('PluginAr\AuthProvider')->GetProviders();
 
-        $aToken = $this->User_GetCurrentUserTokens();
+        $aToken = E::Module('User')->GetCurrentUserTokens();
         /** @var PluginAr_ModuleAuthProvider_EntityUserToken $v */
         foreach ($aToken as $k => $v) {
-            $aToken[$k]->setSearchedCount($this->PluginAr_AuthProvider_GetCountSearchedFriendsByTokenId($v->getTokenId()));
+            $aToken[$k]->setSearchedCount(E::Module('PluginAr\AuthProvider')->GetCountSearchedFriendsByTokenId($v->getTokenId()));
         }
 
-        $this->Viewer_Assign('aToken', $aToken);
-        $this->Viewer_Assign('aRepost', $this->User_GetCurrentUserRepostSettings());
-        $this->Viewer_Assign('aProviders', $aProviders);
-        $this->Viewer_Assign('sSocialText', $this->User_GetCurrentUserText('topic'));
+        E::Module('Viewer')->Assign('aToken', $aToken);
+        E::Module('Viewer')->Assign('aRepost', E::Module('User')->GetCurrentUserRepostSettings());
+        E::Module('Viewer')->Assign('aProviders', $aProviders);
+        E::Module('Viewer')->Assign('sSocialText', E::Module('User')->GetCurrentUserText('topic'));
 
     }
 
@@ -46,7 +48,7 @@ class PluginAr_ActionSettings extends PluginAr_Inherit_ActionSettings {
     protected function EventProfile() {
 
         if (E::IsUser() && E::UserId() == $this->oUserCurrent->getId()) {
-            $this->Cache_Set(
+            E::Module('Cache')->Set(
                 $this->oUserCurrent->getProfileAbout(),
                 'current_user_profile_about',
                 $aTags = array(),
@@ -58,3 +60,5 @@ class PluginAr_ActionSettings extends PluginAr_Inherit_ActionSettings {
     }
 
 }
+
+// EOF

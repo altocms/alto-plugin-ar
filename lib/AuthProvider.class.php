@@ -90,6 +90,7 @@ abstract class AuthProvider {
     const REPOST_RIGHT_STATUS = 'status';
     const REPOST_RIGHT_GROUP = 'group';
     const REPOST_RIGHT_FRIENDS = 'friends';
+
     public $aRepostRights = array(
         AuthProvider::REPOST_RIGHT_WALL   => FALSE, // Репост записей стены
         AuthProvider::REPOST_RIGHT_STATUS => FALSE, // Репост статуса
@@ -112,6 +113,7 @@ abstract class AuthProvider {
      * @return bool|PluginAr_ModuleAuthProvider_EntityUserToken
      */
     public function getToken() {
+
         if ($this->oToken) {
             return $this->oToken;
         }
@@ -127,6 +129,7 @@ abstract class AuthProvider {
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
      */
     public function setToken($oToken) {
+
         $this->oToken = $oToken;
     }
 
@@ -137,6 +140,7 @@ abstract class AuthProvider {
      * @return array|mixed|string
      */
     protected function _urlencode_rfc3986($data) {
+
         if (is_array($data)) {
             return array_map(array(__CLASS__, '_urlencode_rfc3986'), $data);
         } elseif (is_scalar($data)) {
@@ -197,6 +201,7 @@ abstract class AuthProvider {
      * @param bool|int $iLastErrorCode
      */
     public function setLastErrorCode($iLastErrorCode) {
+
         $this->iLastErrorCode = $iLastErrorCode;
     }
 
@@ -209,6 +214,7 @@ abstract class AuthProvider {
      * @param bool $bUseCurl Использовать курл или нет
      */
     public function __construct($sName, $aConfig, $bUseCurl) {
+
         $this->sName = $sName;
 
         /**
@@ -253,6 +259,7 @@ abstract class AuthProvider {
      * @return array
      */
     public function getPermissions() {
+
         return $this->aPermissions;
     }
 
@@ -281,6 +288,7 @@ abstract class AuthProvider {
      * @return array
      */
     public function getStringPermissions() {
+
         return implode($this->sPermissionsGutter, $this->aPermissions);
     }
 
@@ -292,6 +300,7 @@ abstract class AuthProvider {
      * @return mixed
      */
     public function EvalUrl($sUrl, $aAdditionalData = array()) {
+
         return str_replace(
             array_merge(array('%%client_id%%', '%%secret_key%%', '%%permissions%%', '%%redirect%%'), array_keys($aAdditionalData)),
             array_merge(array($this->sClientId, $this->sSecretKey, $this->getStringPermissions(), urlencode($this->sRedirect)), array_values($aAdditionalData)),
@@ -377,11 +386,13 @@ abstract class AuthProvider {
         return $sQueryResult;
     }
 
+
     protected function isJson($string) {
         json_decode($string);
 
         return (json_last_error() == JSON_ERROR_NONE);
     }
+
 
     protected function DecodeGetString($string) {
         $query = explode('&', $string);
@@ -402,11 +413,12 @@ abstract class AuthProvider {
      * @param string $sCodeParamName
      * @param bool|array $aHeaders
      * @param bool|array $aAdditionalData
+     *
      * @return bool
      */
     protected function LoadTokenData($bPost = TRUE, $sCodeParamName = 'code', $aHeaders = FALSE, $aAdditionalData = FALSE) {
 
-        if (getRequest('error') || !($sCode = getRequest($sCodeParamName, FALSE))) {
+        if (getRequest('error') || !($sCode = F::GetRequest($sCodeParamName, FALSE))) {
             $this->setLastErrorCode(3);
 
             return FALSE;
@@ -445,9 +457,11 @@ abstract class AuthProvider {
      * @param $aParam
      * @param bool $bPost
      * @param bool|array $aHeaders
+     *
      * @return bool
      */
     function LoadAdditionalData($oToken, $aParam, $bPost = TRUE, $aHeaders = FALSE) {
+
         // Токен не получен :(
         if (!$oToken) {
             return FALSE;
@@ -467,10 +481,13 @@ abstract class AuthProvider {
 
     /**
      * Преобразует в stdObj из json и строки get-запроса
+     *
      * @param $aData
+     *
      * @return mixed|object
      */
     protected function EvalData($aData) {
+
         if ($this->isJson($aData)) {
             $aData = json_decode($aData);
         } else {
@@ -484,6 +501,7 @@ abstract class AuthProvider {
      * Получает доп. данные пользователя
      *
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @return PluginAr_ModuleAuthProvider_EntityData
      */
     abstract public function GetUserData(PluginAr_ModuleAuthProvider_EntityUserToken $oToken);
@@ -491,6 +509,7 @@ abstract class AuthProvider {
     abstract public function GetUserToken();
 
     public function PrepareAuthPath() {
+
         return '/';
     }
 
@@ -499,9 +518,11 @@ abstract class AuthProvider {
      *
      * @param string $sStatus
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @return bool
      */
     public function RepostStatus($sStatus, $oToken) {
+
         return true;
     }
 
@@ -511,20 +532,26 @@ abstract class AuthProvider {
      * @param $sStatus
      * @param $sUrl
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @internal param string $sText
+     *
      * @return bool
      */
     public function RepostWall($sStatus, $sUrl, $oToken) {
+
         return true;
     }
+
     /**
      * Прводит репост топика
      *
      * @param ModuleTopic_EntityTopic $oTopic
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @return bool
      */
     public function RepostPost($oTopic, $oToken) {
+
         return true;
     }
 
@@ -536,11 +563,10 @@ abstract class AuthProvider {
     public function RefreshToken($oToken) {
 
         if ($oToken->getTokenExpire() < time()) {
-            Engine::getInstance()->Message_AddErrorSingle(
-                Engine::getInstance()->Lang_Get('plugin.ar.repost_error_token_expire')
+            E::Module('Message')->AddErrorSingle(
+                E::Module('Lang')->Get('plugin.ar.repost_error_token_expire')
             );
         }
-
     }
 
     /**
@@ -548,9 +574,11 @@ abstract class AuthProvider {
      *
      * @param ModuleTopic_EntityTopic                     $oTopic
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @return bool
      */
     public function PostInGroup($oTopic, $oToken) {
+
         return TRUE;
     }
 
@@ -558,9 +586,13 @@ abstract class AuthProvider {
      * Получает идентфикаторы друзей пользователя из социальной сети
      *
      * @param $oToken
+     *
      * @return bool|string[]
      */
     public function GetFriendsId($oToken) {
+
         return FALSE;
     }
 }
+
+// EOF

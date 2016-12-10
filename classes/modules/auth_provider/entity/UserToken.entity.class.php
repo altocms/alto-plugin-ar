@@ -16,7 +16,6 @@
  * @author      Андрей Г. Воронов <andreyv@gladcode.ru>
  * @copyrights  Copyright © 2014, Андрей Г. Воронов
  *              Является частью плагина Ar
- * @version     0.0.1 от 31.07.2014 2:48
  *
  * @method int getTokenId
  * @method string getTokenData
@@ -35,12 +34,14 @@
  * @method void setTokenDataSecret
  */
 class PluginAr_ModuleAuthProvider_EntityUserToken extends EntityORM {
+
     protected $aRelations = array(
         'user' => array(EntityORM::RELATION_TYPE_BELONGS_TO, 'ModuleUser_EntityUser', 'token_user_id'),
     );
 
     public function getUserByTokenUserId($iUserId) {
-        return $this->User_GetUserById($iUserId);
+
+        return E::Module('User')->GetUserById($iUserId);
     }
 
     /**
@@ -48,15 +49,17 @@ class PluginAr_ModuleAuthProvider_EntityUserToken extends EntityORM {
      * дополнительных данный
      */
     public function getKeyProps() {
+
         unset($this->_aData['token_email']);
         return parent::getKeyProps();
     }
 
     public function getValProps() {
+
         unset($this->_aData['token_email']);
         return parent::getValProps();
     }
 
-
-
 }
+
+// EOF

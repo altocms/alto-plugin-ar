@@ -16,7 +16,6 @@
  * @author      Андрей Г. Воронов <andreyv@gladcode.ru>
  * @copyrights  Copyright © 2014, Андрей Г. Воронов
  *              Является частью плагина Ar
- * @version     0.0.1 от 30.07.2014 23:55
  */
 class PluginAr_ModuleAuthProvider extends ModuleORM {
 
@@ -66,11 +65,11 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
                 unset($this->aProviders[$sProviderName]);
             }
         }
-
     }
 
     /**
      * Есть ли вообще провайдеры для репоста в группы
+     *
      * @return bool
      */
     public function HasEnabledRepostInGroupsProviders() {
@@ -91,17 +90,17 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
         return $bResult;
     }
 
-
     /**
      * Получение пользователя по токену
      *
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @return bool|ModuleUser_EntityUser
      */
     public function GetUserByToken($oToken) {
 
         /** @var PluginAr_ModuleAuthProvider_EntityUserToken|array $oResult */
-        $oResult = $this->PluginAr_AuthProvider_GetUserTokenItemsByFilter(array(
+        $oResult = E::Module('PluginAr\AuthProvider')->GetUserTokenItemsByFilter(array(
             'token_provider_user_id' => $oToken->getTokenProviderUserId(),
             'token_provider_name'    => $oToken->getTokenProviderName(),
         ));
@@ -127,28 +126,29 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
      *
      * @param $sProviderName
      * @internal param \PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @return bool|ModuleUser_EntityUser
      */
     public function GetTokensByProviderName($sProviderName) {
 
         /** @var PluginAr_ModuleAuthProvider_EntityUserToken|array $oResult */
-        return $this->PluginAr_AuthProvider_GetUserTokenItemsByFilter(array(
+        return E::Module('PluginAr\AuthProvider')->GetUserTokenItemsByFilter(array(
             'token_user_id'       => E::UserId(),
             'token_provider_name' => $sProviderName,
         ));
     }
 
-
     /**
      * Получение пользователя по данным токена
      *
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @return bool|ModuleUser_EntityUser
      */
     public function GetUserByTokenData($oToken) {
 
         /** @var array|PluginAr_ModuleAuthProvider_EntityUserToken $oResult */
-        $oResult = $this->PluginAr_AuthProvider_GetUserTokenItemsByFilter(array(
+        $oResult = E::Module('PluginAr\AuthProvider')->GetUserTokenItemsByFilter(array(
             'token_data' => $oToken->getTokenData(),
         ));
 
@@ -166,10 +166,16 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
         return FALSE;
     }
 
+    /**
+     * @param $sUrl
+     * @param $oUser
+     *
+     * @return bool|string
+     */
     public function UploadUserImageByUrl($sUrl, $oUser) {
 
-        if ($sFileTmp = $this->Uploader_UploadRemote($sUrl)) {
-            if ($sFileUrl = $this->User_UploadAvatar($sFileTmp, $oUser, array())) {
+        if ($sFileTmp = E::Module('Uploader')->UploadRemote($sUrl)) {
+            if ($sFileUrl = E::Module('User')->UploadAvatar($sFileTmp, $oUser, array())) {
                 return $sFileUrl;
             }
         }
@@ -184,9 +190,9 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
      */
     public function GetTokenFromSession() {
 
-        $sProviderName = $this->Session_Get('provider_name');
-        $sToken = $this->Session_Get($sProviderName . '_token');
-        $sTokenSecret = $this->Session_Get($sProviderName . '_token_secret');
+        $sProviderName = E::Module('Session')->Get('provider_name');
+        $sToken = E::Module('Session')->Get($sProviderName . '_token');
+        $sTokenSecret = E::Module('Session')->Get($sProviderName . '_token_secret');
 
         if (!($sProviderName && $sToken && $sTokenSecret)) {
             return FALSE;
@@ -207,6 +213,7 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
      * Возвращает автоматически сформированный логин пользователя
      *
      * @param PluginAr_ModuleAuthProvider_EntityData $oUserData
+     *
      * @return string
      */
     public function GetAutoLogin($oUserData) {
@@ -243,7 +250,7 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
         if (!preg_match($sValidateRegexp, $sLogin)) {
             return md5($oUserData->getDataLogin());
         }
-        if ($this->User_GetUserByLogin($sLogin)) {
+        if (E::Module('User')->GetUserByLogin($sLogin)) {
             return substr(md5($oUserData->getDataLogin()), 0, Config::Get('module.user.login.max_size'));
         }
 
@@ -254,6 +261,7 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
      * Создает и возвращает нового пользователя по данным от провайдера
      *
      * @param PluginAr_ModuleAuthProvider_EntityData $oUserData
+     *
      * @return ModuleUser_EntityUser
      */
     public function CreateNewUserByUserData($oUserData) {
@@ -264,10 +272,10 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
          */
         if (E::IsUser()) {
             $aType = array('social');
-            $aFields = $this->User_getUserFields($aType);
+            $aFields = E::Module('User')->getUserFields($aType);
             foreach ($aFields as $oField) {
                 if (Config::Get("plugin.ar.providers.{$oUserData->getDataProviderName()}.name") == $oField->getName()) {
-                    $this->User_setUserFieldsValues(E::User()->getId(), array($oField->getId() => $oUserData->getDataPage()), 1);
+                    E::Module('User')->setUserFieldsValues(E::User()->getId(), array($oField->getId() => $oUserData->getDataPage()), 1);
                     break;
                 }
             }
@@ -279,16 +287,16 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
          * Создание новой учетки
          */
         // Логин валидный
-        $bError = $this->User_InvalidLogin($oUserData->getDataLogin());
+        $bError = E::Module('User')->InvalidLogin($oUserData->getDataLogin());
         if ($bError > 0) return 1;
         // И пользователя такого нет
-        $bError = $this->User_GetUserByLogin($oUserData->getDataLogin());
+        $bError = E::Module('User')->GetUserByLogin($oUserData->getDataLogin());
         if ($bError) return 2;
         // И емайл, что ни удивительно правильный или пустой
         $bError = F::CheckVal($oUserData->getDataMail(), 'mail');
         if (!$bError) return 3;
         // И его еще нет в базе
-        $bError = $this->User_GetUserByMail($oUserData->getDataMail());
+        $bError = E::Module('User')->GetUserByMail($oUserData->getDataMail());
         if ($bError) return 4;
 
         // Вот теперь пользователь правильный, нужно его создать
@@ -305,13 +313,13 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
 
         $oUser->setUserLogin($oUserData->getDataLogin());
 
-        if ($this->User_Add($oUser)) {
+        if (E::Module('User')->Add($oUser)) {
 
             $sDateActivate = date("Y-m-d H:i:s");
             if (Config::Get('general.reg.activation') == TRUE && !Config::Get('plugin.ar.express')) {
                 $sDateActivate = NULL;
                 $oUser->setActivateKey(F::RandomStr());
-                $this->Notify_SendRegistrationActivate($oUser, $sPassword);
+                E::Module('Notify')->SendRegistrationActivate($oUser, $sPassword);
                 $oUser->setActivate(0);
             } else {
                 $oUser->setActivate(1);
@@ -333,15 +341,15 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
             }
 
             $aType = array('social');
-            $aFields = $this->User_getUserFields($aType);
+            $aFields = E::Module('User')->getUserFields($aType);
             foreach ($aFields as $oField) {
                 if (Config::Get("plugin.ar.providers.{$oUserData->getDataProviderName()}.name") == $oField->getName()) {
-                    $this->User_setUserFieldsValues($oUser->getId(), array($oField->getId() => $oUserData->getDataPage()), 1);
+                    E::Module('User')->setUserFieldsValues($oUser->getId(), array($oField->getId() => $oUserData->getDataPage()), 1);
                     break;
                 }
             }
 
-            $this->User_Update($oUser);
+            E::Module('User')->Update($oUser);
 
             return $oUser;
         }
@@ -354,6 +362,7 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
      * Получение провайдера по его имени
      *
      * @param $sProviderName
+     *
      * @return AuthProvider|bool
      */
     public function GetProviderByName($sProviderName) {
@@ -371,9 +380,14 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
         return $this->aProviders;
     }
 
+    /**
+     * @param $aToken
+     *
+     * @return array|bool
+     */
     public function GetProvidersByTokenIdArray($aToken) {
 
-        $oResult = $this->PluginAr_AuthProvider_GetUserTokenItemsByTokenIdIn($aToken);
+        $oResult = E::Module('PluginAr\AuthProvider')->GetUserTokenItemsByTokenIdIn($aToken);
 
         if ($oResult) {
             $aProviders = array();
@@ -414,11 +428,12 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
      * Количество найденных черехз социальные сети друзей
      *
      * @param $iTokenId
+     *
      * @return int
      */
     public function GetCountSearchedFriendsByTokenId($iTokenId) {
 
-        $aResult = $this->PluginAr_AuthProvider_GetSearchedUserItemsByFilter(array(
+        $aResult = E::Module('PluginAr\AuthProvider')->GetSearchedUserItemsByFilter(array(
             'searched_token_id' => $iTokenId,
         ));
 

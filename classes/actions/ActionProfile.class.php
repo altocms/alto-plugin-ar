@@ -9,9 +9,10 @@
  * ----------------------------------------------------------------------------
  */
 
-class PluginAr_ActionProfile extends PluginAr_Inherit_ActionProfile {
+class PluginAr_ActionProfile extends PluginAr_Inherits_ActionProfile {
 
     protected function RegisterEvent() {
+
         parent::RegisterEvent();
         $this->AddEventPreg('/^.+$/i', '/^invited/i', '/^(page([1-9]\d{0,5}))?$/i', 'EventInvitedFriends');
     }
@@ -24,31 +25,23 @@ class PluginAr_ActionProfile extends PluginAr_Inherit_ActionProfile {
         if (!$this->CheckUserProfile()) {
             return parent::EventNotFound();
         }
-        /**
-         * Передан ли номер страницы
-         */
+        // * Передан ли номер страницы
         $iPage = $this->GetParamEventMatch(1, 2) ? $this->GetParamEventMatch(1, 2) : 1;
-        /**
-         * Получаем список комментов
-         */
-        $aResult = $this->User_GetUsersInvitedFriend(
+        // * Получаем список комментов
+        $aResult = E::Module('User')->GetUsersInvitedFriend(
             $this->oUserProfile->getId(), $iPage, Config::Get('module.user.per_page')
         );
         $aFriends = $aResult['collection'];
-        /**
-         * Формируем постраничность
-         */
-        $aPaging = $this->Viewer_MakePaging(
+        // * Формируем постраничность
+        $aPaging = E::Module('Viewer')->MakePaging(
             $aResult['count'], $iPage, Config::Get('module.user.per_page'), Config::Get('pagination.pages.count'),
             $this->oUserProfile->getUserUrl() . 'friends'
         );
-        /**
-         * Загружаем переменные в шаблон
-         */
-        $this->Viewer_Assign('aPaging', $aPaging);
-        $this->Viewer_Assign('aFriends', $aFriends);
-        $this->Viewer_AddHtmlTitle(
-            $this->Lang_Get('user_menu_profile_friends') . ' ' . $this->oUserProfile->getLogin()
+        // * Загружаем переменные в шаблон
+        E::Module('Viewer')->Assign('aPaging', $aPaging);
+        E::Module('Viewer')->Assign('aFriends', $aFriends);
+        E::Module('Viewer')->AddHtmlTitle(
+            E::Module('Lang')->Get('user_menu_profile_friends') . ' ' . $this->oUserProfile->getLogin()
         );
 
         $this->sMenuSubItemSelect = 'invited';
@@ -56,3 +49,5 @@ class PluginAr_ActionProfile extends PluginAr_Inherit_ActionProfile {
     }
 
 }
+
+// EOF

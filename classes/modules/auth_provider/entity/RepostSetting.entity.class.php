@@ -16,7 +16,6 @@
  * @author      Андрей Г. Воронов <andreyv@gladcode.ru>
  * @copyrights  Copyright © 2014, Андрей Г. Воронов
  *              Является частью плагина Ar
- * @version     0.0.1 от 31.07.2014 2:48
  *
  * @method int getSettingValue
  *
@@ -29,6 +28,10 @@ class PluginAr_ModuleAuthProvider_EntityRepostSetting extends EntityORM {
     );
 
     public function getUserBySettingUserId($iUserId) {
-        return $this->User_GetUserById($iUserId);
+
+        return E::Module('User')->GetUserById($iUserId);
     }
+
 }
+
+// EOF

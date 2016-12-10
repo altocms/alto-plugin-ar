@@ -46,6 +46,7 @@ class TwProvider extends AuthProvider {
      * @return bool|string[]
      */
     public function GetFriendsId($oToken) {
+
         $this->bPostMethod = FALSE;
         $this->aHeaders = array('Content-Type: application/x-www-form-urlencoded');
 
@@ -222,7 +223,7 @@ class TwProvider extends AuthProvider {
     public function GetUserData(PluginAr_ModuleAuthProvider_EntityUserToken $oToken) {
 
         // Проверяем входящий токен
-        if ($oToken->getTokenData() != getRequest('oauth_token', FALSE)) {
+        if ($oToken->getTokenData() != F::GetRequest('oauth_token', FALSE)) {
             return FALSE;
         }
 
@@ -233,7 +234,7 @@ class TwProvider extends AuthProvider {
             "oauth_timestamp"        => time(),
             "oauth_version"          => "1.0",
             "oauth_nonce"            => time(),
-            "oauth_verifier"         => getRequest('oauth_verifier', ''),
+            "oauth_verifier"         => F::GetRequest('oauth_verifier', ''),
         ), $oToken->getTokenDataSecret());
 
         if ($aData) {
@@ -254,7 +255,6 @@ class TwProvider extends AuthProvider {
                 'data_mail'          => '',
                 'data_photo'         => '',
             ));
-
 
             $aAdditionalData = $this->SendRequestToTwitter(
                 $this->sAdditionalDataUrl,
@@ -281,10 +281,9 @@ class TwProvider extends AuthProvider {
             return $oUserData;
         }
 
-
         return FALSE;
-
     }
 
-
 }
+
+// EOF
