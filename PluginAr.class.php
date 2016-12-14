@@ -76,8 +76,8 @@ class PluginAr extends Plugin {
      */
     public function Init() {
 
-        E::Module('Viewer')->AppendStyle(Plugin::GetTemplatePath(__CLASS__) . 'assets/css/style.css'); // Добавление своего CSS
-        E::Module('Viewer')->AppendScript(Plugin::GetTemplatePath(__CLASS__) . 'assets/js/script.js'); // Добавление своего JS
+        E::Module('Viewer')->AppendStyle(Plugin::GetTemplatePath(__CLASS__) . 'assets/css/plugin.ar.css'); // Добавление своего CSS
+        E::Module('Viewer')->AppendScript(Plugin::GetTemplatePath(__CLASS__) . 'assets/js/plugin.ar.js'); // Добавление своего JS
         E::Module('Viewer')->AppendScript('http://vkontakte.ru/js/api/openapi.js'); // API Вконтакта
 
         return TRUE;
