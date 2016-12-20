@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `prefix_repost_setting` (
   DEFAULT CHARSET =utf8
   AUTO_INCREMENT =1;
 
-# ТЕКТОВКИ РЕПОСТИНГА ТОПИКА
+# ТЕКСТОВКИ РЕПОСТИНГА ТОПИКА
 CREATE TABLE IF NOT EXISTS `prefix_repost_text` (
   `text_id`      INT(11)          NOT NULL PRIMARY KEY AUTO_INCREMENT,
   `text_user_id` INT(10) UNSIGNED NOT NULL,
@@ -57,23 +57,23 @@ CREATE TABLE IF NOT EXISTS `prefix_searched_user` (
   DEFAULT CHARSET =utf8
   AUTO_INCREMENT =1;
 
-# ШАБЛОНА КОНТАКТА ДЛЯ МОЕГО МИРА
+# ШАБЛОН КОНТАКТА ДЛЯ МОЕГО МИРА
 INSERT INTO `prefix_user_field` (`id`, `type`, `name`, `title`, `pattern`)
 VALUES (NULL, 'social', 'mm', 'Мой Мир', '<a href="http://my.mail.ru/mail/{*}/" rel="nofollow">{*}</a>');
 
-# ШАБЛОНА КОНТАКТА ДЛЯ ГУГЛА
+# ШАБЛОН КОНТАКТА ДЛЯ ГУГЛА
 INSERT INTO `prefix_user_field` (`id`, `type`, `name`, `title`, `pattern`)
 VALUES (NULL, 'social', 'google', 'Google Plus', '<a href="https://plus.google.com/{*}" rel="nofollow">{*}</a>');
 
-# ШАБЛОНА КОНТАКТА ДЛЯ ГИТХАБА
+# ШАБЛОН КОНТАКТА ДЛЯ ГИТХАБА
 INSERT INTO `prefix_user_field` (`id`, `type`, `name`, `title`, `pattern`)
 VALUES (NULL, 'social', 'guthub', 'GitHub', '<a href="https://github.com/{*}" rel="nofollow">{*}</a>');
 
-# ШАБЛОНА КОНТАКТА ДЛЯ ЛИНКЕДИНА
+# ШАБЛОН КОНТАКТА ДЛЯ ЛИНКЕДИНА
 INSERT INTO `prefix_user_field` (`id`, `type`, `name`, `title`, `pattern`)
 VALUES (NULL, 'social', 'linkedin', 'LinkedIn',
         '<a href="https://www.linkedin.com/profile/view?id={*}" rel="nofollow">{*}</a>');
 
-# ШАБЛОНА КОНТАКТА ДЛЯ ИНСТАГРАММА
+# ШАБЛОН КОНТАКТА ДЛЯ ИНСТАГРАММА
 INSERT INTO `prefix_user_field` (`id`, `type`, `name`, `title`, `pattern`)
 VALUES (NULL, 'social', 'instagram', 'Instagram', '<a href="http://instagram.com/{*}" rel="nofollow">{*}</a>');
