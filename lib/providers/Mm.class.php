@@ -1,17 +1,17 @@
 <?php
 
-require_once __DIR__ . "/../AuthProvider.class.php";
+require_once __DIR__ . '/../AuthProvider.class.php';
 
 class MmProvider extends AuthProvider {
 
     public $sName = 'mm';
     public $sAuthUrl = 'https://connect.mail.ru/oauth/authorize?client_id=%%client_id%%&response_type=code&redirect_uri=%%redirect%%&scope=%%permissions%%';
     public $sTokenUrl = 'https://connect.mail.ru/oauth/token?client_id=%%client_id%%&redirect_uri=%%redirect%%&client_secret=%%secret_key%%&code=%%code%%&grant_type=authorization_code';
-    public $sUserInfoUrl = 'http://www.appsmail.ru/platform/api?method=users.getInfo&secure=1&app_id=%%client_id%%&session_key=%%access_token%%&sig=%%signature%%';
+    public $sUserInfoUrl = 'https://www.appsmail.ru/platform/api?method=users.getInfo&secure=1&app_id=%%client_id%%&session_key=%%access_token%%&sig=%%signature%%';
 
     public $sPermissionsGutter = ' ';
 
-    private $sRepostWallUrl = 'http://www.appsmail.ru/platform/api';
+    private $sRepostWallUrl = 'https://www.appsmail.ru/platform/api';
 
     public $aRepostRights = array(
         AuthProvider::REPOST_RIGHT_WALL   => TRUE, // Репост записей стены
@@ -27,6 +27,7 @@ class MmProvider extends AuthProvider {
      * @return bool|string[]
      */
     public function GetFriendsId($oToken) {
+
         $this->RefreshToken($oToken);
 
         $aParams = array(
@@ -59,11 +60,14 @@ class MmProvider extends AuthProvider {
      * Расчет сигнатуры
      *
      * @see http://api.mail.ru/docs/guides/restapi/
+     *
      * @param array $request_params
      * @param       $secret_key
+     *
      * @return string
      */
     protected function GetSignature(array $request_params, $secret_key) {
+
         ksort($request_params);
         $params = '';
         foreach ($request_params as $key => $value) {
@@ -81,6 +85,7 @@ class MmProvider extends AuthProvider {
      * @return string
      */
     protected function BuildParamsString(array $request_params, $sSignature) {
+
         ksort($request_params);
         $params = '?';
         foreach ($request_params as $key => $value) {
@@ -95,6 +100,7 @@ class MmProvider extends AuthProvider {
      *
      * @param ModuleTopic_EntityTopic                     $oTopic
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @return bool|void
      */
     public function RepostPost($oTopic, $oToken) {
@@ -119,7 +125,6 @@ class MmProvider extends AuthProvider {
             $this->sRepostWallUrl . $this->BuildParamsString($aParams, $this->GetSignature($aParams, $this->sSecretKey)),
             TRUE
         );
-
     }
 
     /**
@@ -127,6 +132,7 @@ class MmProvider extends AuthProvider {
      *
      * @param string                                      $sStatus
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @return bool|void
      */
     public function RepostStatus($sStatus, $oToken) {
@@ -149,7 +155,6 @@ class MmProvider extends AuthProvider {
             $this->sRepostWallUrl . $this->BuildParamsString($aParams, $this->GetSignature($aParams, $this->sSecretKey)),
             TRUE
         );
-
     }
 
     /**
@@ -158,6 +163,7 @@ class MmProvider extends AuthProvider {
      * @param                                             $sStatus
      * @param                                             $sUrl
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @return bool|void
      */
     public function RepostWall($sStatus, $sUrl, $oToken) {
@@ -182,7 +188,6 @@ class MmProvider extends AuthProvider {
             $this->sRepostWallUrl . $this->BuildParamsString($aParams, $this->GetSignature($aParams, $this->sSecretKey)),
             TRUE
         );
-
     }
 
     /**
@@ -197,9 +202,7 @@ class MmProvider extends AuthProvider {
             return FALSE;
         }
 
-        /**
-         * Возвратим объект токена
-         */
+        // * Возвратим объект токена
         $oToken = Engine::GetEntity('PluginAr_ModuleAuthProvider_EntityUserToken', array(
             'token_provider_name'    => $this->sName,
             'token_data'             => $aData->access_token,
@@ -210,9 +213,14 @@ class MmProvider extends AuthProvider {
         return $oToken;
     }
 
-    public function GetUserData(PluginAr_ModuleAuthProvider_EntityUserToken $oToken) {
+    /**
+     * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
+     * @return bool|Entity
+     */
+    public function GetUserData($oToken) {
 
-        if (!$aData = $this->LoadAdditionalData(
+        if (!$sData = $this->LoadAdditionalData(
             $oToken,
             array(
                 '%%access_token%%' => $oToken->getTokenData(),
@@ -223,14 +231,11 @@ class MmProvider extends AuthProvider {
         }
 
         // Раскодируем
-        $oData = json_decode($aData);
+        $oData = json_decode($sData);
 
         $oData = $oData[0];
 
-        /**
-         * Получили дополнительные данные. Заполним профиль из того, что есть
-         */
-
+        // * Получили дополнительные данные. Заполним профиль из того, что есть
         return Engine::GetEntity('PluginAr_ModuleAuthProvider_EntityData', array(
             'data_provider_name' => $this->sName,
             'data_login'         => $this->sName . '_' . $oData->uid,
@@ -243,8 +248,8 @@ class MmProvider extends AuthProvider {
             'data_mail'          => @$oData->email,
             'data_photo' => @$oData->has_pic ? @$oData->pic_big : '',
         ));
-
     }
 
-
 }
+
+// EOF

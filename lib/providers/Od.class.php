@@ -1,9 +1,12 @@
 <?php
 
-require_once __DIR__ . "/../AuthProvider.class.php";
+require_once __DIR__ . '/../AuthProvider.class.php';
 
 /**
- * VALUABLE_ACCESS - доступ ко всем методам API, кроме users.getLoggedInUser и users.getCurrentUser. Данное право выставляется также и со стороны Одноклассников. Для запроса следует отправить email с идентификатором и shortname приложения на адрес oauth@odnoklassniki.ru
+ * VALUABLE_ACCESS - доступ ко всем методам API, кроме users.getLoggedInUser и users.getCurrentUser.
+ * Данное право выставляется также и со стороны Одноклассников.
+ * Для запроса следует отправить email с идентификатором и shortname приложения на адрес oauth@odnoklassniki.ru
+ * 
  * Class OdProvider
  */
 class OdProvider extends AuthProvider {
@@ -29,12 +32,12 @@ class OdProvider extends AuthProvider {
     public function GetFriendsId($oToken) {
 
         $sUrl = $this->EvalUrl(
-            "http://api.odnoklassniki.ru/fb.do?access_token=%%access_token%%&application_key=%%public_key%%&method=friends.get&sig=%%signature%%&uid=%%uid%%",
+            'http://api.odnoklassniki.ru/fb.do?access_token=%%access_token%%&application_key=%%public_key%%&method=friends.get&sig=%%signature%%&uid=%%uid%%',
             array(
                 '%%public_key%%'   => Config::Get('plugin.ar.providers.od.od_public_key'),
                 '%%access_token%%' => $oToken->getTokenData(),
                 '%%uid%%'          => $oToken->getTokenProviderUserId(),
-                '%%signature%%'    => md5("application_key=" . Config::Get('plugin.ar.providers.od.od_public_key') . "method=friends.getuid={$oToken->getTokenProviderUserId()}" . md5($oToken->getTokenData() . Config::Get('plugin.ar.providers.od.od_secret_key')))
+                '%%signature%%'    => md5('application_key=' . Config::Get('plugin.ar.providers.od.od_public_key') . 'method=friends.getuid={$oToken->getTokenProviderUserId()}' . md5($oToken->getTokenData() . Config::Get('plugin.ar.providers.od.od_secret_key')))
             )
         );
 
@@ -79,26 +82,28 @@ class OdProvider extends AuthProvider {
         return $oToken;
     }
 
-    public function GetUserData(PluginAr_ModuleAuthProvider_EntityUserToken $oToken) {
+    /**
+     * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
+     * @return bool|Entity
+     */
+    public function GetUserData($oToken) {
 
-        if (!$aData = $this->LoadAdditionalData(
+        if (!$sData = $this->LoadAdditionalData(
             $oToken,
             array(
                 '%%public_key%%'   => Config::Get('plugin.ar.providers.od.od_public_key'),
                 '%%access_token%%' => $oToken->getTokenData(),
-                '%%signature%%'    => md5("application_key=" . Config::Get('plugin.ar.providers.od.od_public_key') . "method=users.getCurrentUser" . md5($oToken->getTokenData() . Config::Get('plugin.ar.providers.od.od_secret_key')))
+                '%%signature%%'    => md5('application_key=' . Config::Get('plugin.ar.providers.od.od_public_key') . 'method=users.getCurrentUser' . md5($oToken->getTokenData() . Config::Get('plugin.ar.providers.od.od_secret_key')))
             ))
         ) {
             return FALSE;
         }
 
         // Раскодируем
-        $oData = json_decode($aData);
+        $oData = json_decode($sData);
 
-        /**
-         * Получили дополнительные данные. Заполним профиль из того, что есть
-         */
-
+        // * Получили дополнительные данные. Заполним профиль из того, что есть
         return Engine::GetEntity('PluginAr_ModuleAuthProvider_EntityData', array(
             'data_provider_name' => $this->sName,
             'data_login'         => $this->sName . '_' . $oData->uid,
@@ -111,8 +116,8 @@ class OdProvider extends AuthProvider {
             'data_mail'          => '',
             'data_photo'         => @$oData->photo_id ? $oData->pic_2 : '',
         ));
-
     }
 
-
 }
+
+// EOF

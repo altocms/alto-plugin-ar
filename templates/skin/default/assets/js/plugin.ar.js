@@ -11,7 +11,7 @@
 var ls = ls || {};
 
 ls.ar = (function ($) {
-
+    "use strict";
     /**
      * Поиск друзей по сайту
      *
@@ -20,7 +20,6 @@ ls.ar = (function ($) {
      * @param iSocialId
      */
     this.findFriends = function($this, iSocialId) {
-
         var url = aRouter.auth + 'find/';
 
         $this.find('i').addClass('fa-spin');
@@ -52,7 +51,6 @@ ls.ar = (function ($) {
      * @returns {boolean}
      */
     this.repostInGroup = function($this) {
-
         var url = aRouter.auth + 'repost/';
 
         $this.find('i').addClass('fa-spin');
@@ -79,7 +77,6 @@ ls.ar = (function ($) {
      * @returns {boolean}
      */
     this.removeSocial = function($this, $iSocialId) {
-
         var url = aRouter.auth + 'remove/';
 
         $this.addClass('fa-spin');
@@ -105,7 +102,6 @@ ls.ar = (function ($) {
      * @returns {boolean}
      */
     this.toggleRepost = function($this) {
-
         var url = aRouter.auth + 'toggle/';
 
         ls.ajax(url, {id: $this.data('id'), 'type': $this.data('type')}, function (result) {
@@ -128,8 +124,8 @@ ls.ar = (function ($) {
      * @returns {boolean}
      */
     this.setSocialText = function(sType, sText, $this) {
-
         var url = aRouter.auth + 'text/';
+
         $this.addClass('loading');
         ls.ajax(url, {text_type: sType, text_val: sText}, function (result) {
             $this.removeClass('loading');
@@ -142,9 +138,7 @@ ls.ar = (function ($) {
         return false;
     };
 
-
     return this;
-
 
 }).call(ls.ar || {}, jQuery);
 
@@ -153,7 +147,5 @@ ls.ar = (function ($) {
 if (window.location.hash && window.location.hash == '#_=_') {
     window.location.hash = '';
 }
-
-
 
 

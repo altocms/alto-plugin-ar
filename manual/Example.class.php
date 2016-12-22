@@ -121,7 +121,6 @@ class ExampleProvider extends AuthProvider {
 
         // Вызовем родительский метод. !!Обязательно!! А уж после наш код.
         parent::Init();
-
     }
 
     /**
@@ -135,8 +134,9 @@ class ExampleProvider extends AuthProvider {
      *
      * Типовой код приведен в примере
      *
-     * @return PluginAr_ModuleAuthProvider_EntityUserToken|bool
      * @throws Exception
+     *
+     * @return PluginAr_ModuleAuthProvider_EntityUserToken|bool
      */
     public function GetUserToken() {
 
@@ -169,20 +169,21 @@ class ExampleProvider extends AuthProvider {
      * Типовой код приведен в примере
      *
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken Полученый токен
+     *
      * @return bool|Entity
      */
-    public function GetUserData(PluginAr_ModuleAuthProvider_EntityUserToken $oToken) {
+    public function GetUserData($oToken) {
 
         // Получаем дополнительные данные
-        if (!$aData = $this->LoadAdditionalData($oToken, array('%%access_token%%' => $oToken->getTokenData()), FALSE)) {
+        if (!$sData = $this->LoadAdditionalData($oToken, array('%%access_token%%' => $oToken->getTokenData()), FALSE)) {
             return FALSE;
         }
 
         // Раскодируем их
-        $oData = json_decode($aData);
+        $oData = json_decode($sData);
 
         // Проверим что пришло
-        if (is_null($oData)) {
+        if (empty($oData)) {
             return FALSE;
         }
 
@@ -201,7 +202,6 @@ class ExampleProvider extends AuthProvider {
         ));
 
         return $oAdditionalData;
-
     }
 
     /*************************************************************************************************
@@ -242,9 +242,11 @@ class ExampleProvider extends AuthProvider {
      *
      * @param string                                      $sStatus Текст статуса
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken  Токен пользователя
+     *
      * @return bool
      */
     public function RepostStatus($sStatus, $oToken) {
+
         return TRUE;
     }
 
@@ -254,12 +256,15 @@ class ExampleProvider extends AuthProvider {
      * РЕАЛИЗУЕТСЯ САМОМТОЯТЕЛЬНО
      *
      * @param string                                      $sStatus Текст со стены
-     * @param       string                                $sUrl    Урл репоста
+     * @param string                                      $sUrl    Урл репоста
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken  Токен пользователя
+     *
      * @internal param string $sText
+     *
      * @return bool
      */
     public function RepostWall($sStatus, $sUrl, $oToken) {
+
         return TRUE;
     }
 
@@ -270,9 +275,11 @@ class ExampleProvider extends AuthProvider {
      *
      * @param ModuleTopic_EntityTopic                     $oTopic Топик для репоста
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken Токен пользователя
+     *
      * @return bool
      */
     public function RepostPost($oTopic, $oToken) {
+
         return TRUE;
     }
 
@@ -283,9 +290,11 @@ class ExampleProvider extends AuthProvider {
      *
      * @param ModuleTopic_EntityTopic                     $oTopic Топик для репоста
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken Токен пользователя
+     *
      * @return bool
      */
     public function PostInGroup($oTopic, $oToken) {
+
         return TRUE;
     }
 
@@ -295,9 +304,11 @@ class ExampleProvider extends AuthProvider {
      * РЕАЛИЗУЕТСЯ САМОМТОЯТЕЛЬНО
      *
      * @param $oToken
+     *
      * @return bool|string[]
      */
     public function GetFriendsId($oToken) {
+
         return FALSE;
     }
 
@@ -324,7 +335,8 @@ class ExampleProvider extends AuthProvider {
      * @return string
      */
     protected function CropText($sText, $sPostfix = '...', $iLength = 140) {
-        parent::CropText($sText, $sPostfix, $iLength);
+
+        return parent::CropText($sText, $sPostfix, $iLength);
     }
 
     /**
@@ -343,9 +355,11 @@ class ExampleProvider extends AuthProvider {
      *
      * @param string $sUrl
      * @param array  $aAdditionalData
-     * @return mixed
+     *
+     * @return string
      */
     public function EvalUrl($sUrl, $aAdditionalData = array()) {
+
         return parent::EvalUrl($sUrl, $aAdditionalData);
     }
 
@@ -367,6 +381,7 @@ class ExampleProvider extends AuthProvider {
      * @return bool|stdClass
      */
     protected function SendRequest($sUrl, $bPost = TRUE, $aHeaders = FALSE) {
+
         return parent::SendRequest($sUrl, $bPost, $aHeaders);
     }
 
@@ -375,9 +390,11 @@ class ExampleProvider extends AuthProvider {
      * возвращает TRUE или FALSE, в зависимости от результата
      *
      * @param string $string Проверяемая строка
+     *
      * @return bool
      */
     protected function isJson($string) {
+
         return parent::isJson($string);
     }
 
@@ -399,6 +416,7 @@ class ExampleProvider extends AuthProvider {
      * @return bool|PluginAr_ModuleAuthProvider_EntityUserToken
      */
     protected function LoadTokenData($bPost = TRUE, $sCodeParamName = 'code', $aHeaders = FALSE, $aAdditionalData = FALSE) {
+
         return parent::LoadTokenData($bPost, $sCodeParamName, $aHeaders, $aAdditionalData);
     }
 
@@ -409,9 +427,11 @@ class ExampleProvider extends AuthProvider {
      * @param string[]                                    $aParam   Допонительные параметры для замены в урл
      * @param bool                                        $bPost    Это post запрос? TRUE, если да, иначе FALSE
      * @param bool|array                                  $aHeaders Массив строк дополнительных заголовков
+     *
      * @return bool
      */
     function LoadAdditionalData($oToken, $aParam, $bPost = TRUE, $aHeaders = FALSE) {
+
         return parent::LoadAdditionalData($oToken, $aParam, $bPost, $aHeaders);
     }
 
@@ -422,7 +442,10 @@ class ExampleProvider extends AuthProvider {
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken Токен пользователя
      */
     public function RefreshToken($oToken) {
-        return parent::RefreshToken($oToken);
+
+        parent::RefreshToken($oToken);
     }
 
 }
+
+// EOF

@@ -70,6 +70,15 @@ class PluginAr_ModuleUser_MapperUser extends PluginAr_Inherits_ModuleUser_Mapper
         return array_unique($aUsers);
     }
 
+    public function DeleteTokensByUsersId($aUsersId) {
+
+        $sql = "
+          DELETE FROM ?_user_token
+          WHERE token_user_id IN (?a)
+          ";
+        return $this->oDb->query($sql, $aUsersId) !== false;
+    }
+
 }
 
 // EOF

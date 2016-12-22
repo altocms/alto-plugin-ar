@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . "/../AuthProvider.class.php";
+require_once __DIR__ . '/../AuthProvider.class.php';
 
 class GProvider extends AuthProvider {
 
@@ -13,8 +13,9 @@ class GProvider extends AuthProvider {
     /**
      * Получение токена пользователя
      *
-     * @return PluginAr_ModuleAuthProvider_EntityUserToken
      * @throws Exception
+     *
+     * @return bool|PluginAr_ModuleAuthProvider_EntityUserToken
      */
     public function GetUserToken() {
 
@@ -36,9 +37,14 @@ class GProvider extends AuthProvider {
         return $oToken;
     }
 
-    public function GetUserData(PluginAr_ModuleAuthProvider_EntityUserToken $oToken) {
+    /**
+     * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
+     * @return bool|Entity
+     */
+    public function GetUserData($oToken) {
 
-        if (!$aData = $this->LoadAdditionalData(
+        if (!$sData = $this->LoadAdditionalData(
             $oToken,
             array(
                 '%%access_token%%' => $oToken->getTokenData(),
@@ -48,18 +54,15 @@ class GProvider extends AuthProvider {
         }
 
         // Раскодируем
-        $oData = json_decode($aData);
+        $oData = json_decode($sData);
 
-        /**
-         * Получили дополнительные данные. Заполним профиль из того, что есть
-         */
-
+        // * Получили дополнительные данные. Заполним профиль из того, что есть
         return Engine::GetEntity('PluginAr_ModuleAuthProvider_EntityData', array(
             'data_provider_name' => $this->sName,
             // В идентификаторе от гугла могут содержаться символы, которые не
             // разрешены в логине пользователя, потому будем брать хэш от этого
             // значения и, чтобы уж наверняка, с примесью рандомной строки.
-            'data_login'         => $this->sName . '_' . F::TruncateText(F::DoHashe($oData->id + F::RandomStr()), 20),
+            'data_login'         => $this->sName . '_' . F::TruncateText(F::DoHashe($oData->id . F::RandomStr()), 20),
             'data_name'          => @$oData->given_name,
             'data_surname'       => @$oData->family_name,
             'data_sex'           => 'other',
@@ -69,8 +72,8 @@ class GProvider extends AuthProvider {
             'data_mail'          => @$oData->email,
             'data_photo'         => @$oData->picture,
         ));
-
     }
 
-
 }
+
+// EOF

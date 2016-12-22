@@ -58,9 +58,7 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
                 Config::Get('plugin.ar.use_curl')
             );
 
-            /**
-             * Если была ошибка создания объекта авторизации
-             */
+            // * Если была ошибка создания объекта авторизации
             if ($this->aProviders[$sProviderName]->getLastError()) {
                 unset($this->aProviders[$sProviderName]);
             }
@@ -262,14 +260,12 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
      *
      * @param PluginAr_ModuleAuthProvider_EntityData $oUserData
      *
-     * @return ModuleUser_EntityUser
+     * @return ModuleUser_EntityUser|bool|int
      */
     public function CreateNewUserByUserData($oUserData) {
 
-        /**
-         * Если пользователь авторизован, то только привязываем его к новой соц.сети,
-         * но ни как не создаем повторно
-         */
+        // * Если пользователь авторизован, то только привязываем его к новой соц.сети,
+        // * но ни как не создаем повторно
         if (E::IsUser()) {
             $aType = array('social');
             $aFields = E::Module('User')->getUserFields($aType);
@@ -283,30 +279,39 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
             return TRUE;
         }
 
-        /**
-         * Создание новой учетки
-         */
+        // * Создание новой учетки
         // Логин валидный
         $bError = E::Module('User')->InvalidLogin($oUserData->getDataLogin());
-        if ($bError > 0) return 1;
+        if ($bError > 0) {
+            $sErrorMessage = E::ModuleUser()->GetLoginErrorMessage($bError);
+            F::SysWarning($sErrorMessage . ' (login:' . $oUserData->getDataLogin() . ')');
+            return 1;
+        }
         // И пользователя такого нет
         $bError = E::Module('User')->GetUserByLogin($oUserData->getDataLogin());
-        if ($bError) return 2;
+        if ($bError) {
+            return 2;
+        }
         // И емайл, что ни удивительно правильный или пустой
         $bError = F::CheckVal($oUserData->getDataMail(), 'mail');
-        if (!$bError) return 3;
+        if (!$bError) {
+            return 3;
+        }
         // И его еще нет в базе
         $bError = E::Module('User')->GetUserByMail($oUserData->getDataMail());
-        if ($bError) return 4;
+        if ($bError) {
+            return 4;
+        }
 
         // Вот теперь пользователь правильный, нужно его создать
-        $sPassword =  func_generator(10);
+        $sPassword = F::RandomStr(10);
+        /** @var ModuleUser_EntityUser $oUser */
         $oUser = Engine::GetEntity('ModuleUser_EntityUser', array(
             'user_login'         => $oUserData->getDataLogin(),
             'user_password'      => $sPassword,
             'user_mail'          => is_null($oUserData->getDataMail()) ? '' : $oUserData->getDataMail(),
             'user_date_register' => date("Y-m-d H:i:s"),
-            'user_ip_register'   => func_getIp(),
+            'user_ip_register'   => F::GetUserIp(),
             'user_activate'      => 1,
             'user_activate_key'  => NULL,
         ));
@@ -315,10 +320,10 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
 
         if (E::Module('User')->Add($oUser)) {
 
-            $sDateActivate = date("Y-m-d H:i:s");
+            $sDateActivate = F::Now();
             if (Config::Get('general.reg.activation') == TRUE && !Config::Get('plugin.ar.express')) {
                 $sDateActivate = NULL;
-                $oUser->setActivateKey(F::RandomStr());
+                $oUser->setActivationKey(F::RandomStr());
                 E::Module('Notify')->SendRegistrationActivate($oUser, $sPassword);
                 $oUser->setActivate(0);
             } else {
@@ -353,7 +358,6 @@ class PluginAr_ModuleAuthProvider extends ModuleORM {
 
             return $oUser;
         }
-
 
         return FALSE;
     }

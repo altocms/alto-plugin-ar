@@ -83,20 +83,19 @@ abstract class AuthProvider {
 
     /**
      * Права репоста, изначально всё запрещено
-     * @var array
      */
-    const REPOST_RIGHT_POST = 'post';
-    const REPOST_RIGHT_WALL = 'wall';
-    const REPOST_RIGHT_STATUS = 'status';
-    const REPOST_RIGHT_GROUP = 'group';
-    const REPOST_RIGHT_FRIENDS = 'friends';
+    const REPOST_RIGHT_POST     = 'post';
+    const REPOST_RIGHT_WALL     = 'wall';
+    const REPOST_RIGHT_STATUS   = 'status';
+    const REPOST_RIGHT_GROUP    = 'group';
+    const REPOST_RIGHT_FRIENDS  = 'friends';
 
     public $aRepostRights = array(
-        AuthProvider::REPOST_RIGHT_WALL   => FALSE, // Репост записей стены
-        AuthProvider::REPOST_RIGHT_STATUS => FALSE, // Репост статуса
-        AuthProvider::REPOST_RIGHT_POST   => FALSE, // Репост топиков
-        AuthProvider::REPOST_RIGHT_GROUP => FALSE, // Репост топиков
-        AuthProvider::REPOST_RIGHT_FRIENDS => FALSE, // Поиск друзей по сайту
+        AuthProvider::REPOST_RIGHT_WALL     => FALSE, // Репост записей стены
+        AuthProvider::REPOST_RIGHT_STATUS   => FALSE, // Репост статуса
+        AuthProvider::REPOST_RIGHT_POST     => FALSE, // Репост топиков
+        AuthProvider::REPOST_RIGHT_GROUP    => FALSE, // Репост топиков
+        AuthProvider::REPOST_RIGHT_FRIENDS  => FALSE, // Поиск друзей по сайту
     );
 
     public $sPermissionsGutter = ',';
@@ -134,10 +133,11 @@ abstract class AuthProvider {
     }
 
     /**
-     * Энкодирует строки и массивы
+     * Кодирует строки и массивы
      *
      * @param $data
-     * @return array|mixed|string
+     *
+     * @return array|string
      */
     protected function _urlencode_rfc3986($data) {
 
@@ -179,6 +179,7 @@ abstract class AuthProvider {
 
     /**
      * Получение ошибки в виде массива [code, description]
+     *
      * @return bool|int
      */
     public function getLastError() {
@@ -217,9 +218,8 @@ abstract class AuthProvider {
 
         $this->sName = $sName;
 
-        /**
-         * Легкая валидация данных. Только на наличие
-         */
+        // * Легкая валидация данных. Только на наличие
+
         // Проверим идентификатор приложения
         if (!isset($aConfig[$this->sName . '_' . 'client_id']) || empty($aConfig[$this->sName . '_' . 'client_id'])) {
             $this->iLastErrorCode = 1;
@@ -234,10 +234,7 @@ abstract class AuthProvider {
             return;
         }
 
-
-        /**
-         * Установим секретные параметры
-         */
+        // * Установим секретные параметры
         $this->sClientId = $aConfig[$this->sName . '_' . 'client_id'];
         $this->sSecretKey = $aConfig[$this->sName . '_' . 'secret_key'];
         $this->sGroupId = isset($aConfig[$this->sName . '_' . 'group_id']) ? $aConfig[$this->sName . '_' . 'group_id'] : FALSE;
@@ -256,6 +253,7 @@ abstract class AuthProvider {
 
     /**
      * Получение массива прав
+     *
      * @return array
      */
     public function getPermissions() {
@@ -266,10 +264,11 @@ abstract class AuthProvider {
     /**
      * Отрезает 140 символов текста твита
      *
-     * @param $sText
+     * @param string $sText
      * @param string $sPostfix
-     * @param int $iLength
-     * @return mixed
+     * @param int    $iLength
+     *
+     * @return string
      */
     protected function CropText($sText, $sPostfix = '...', $iLength = 140) {
 
@@ -279,13 +278,12 @@ abstract class AuthProvider {
         }
 
         return $sText;
-
     }
-
 
     /**
      * Получение массива прав
-     * @return array
+     *
+     * @return string
      */
     public function getStringPermissions() {
 
@@ -296,8 +294,9 @@ abstract class AuthProvider {
      * Подставляет параметры в url
      *
      * @param string $sUrl
-     * @param array $aAdditionalData
-     * @return mixed
+     * @param array  $aAdditionalData
+     *
+     * @return string
      */
     public function EvalUrl($sUrl, $aAdditionalData = array()) {
 
@@ -313,9 +312,7 @@ abstract class AuthProvider {
      */
     public function Init() {
 
-        /**
-         * В группу репостят только админы
-         */
+        // * В группу репостят только админы
         if (!E::IsAdmin()) {
             $this->sGroupId = FALSE;
             $this->aRepostRights['group'] = FALSE;
@@ -332,24 +329,22 @@ abstract class AuthProvider {
             );
         }
 
-        /**
-         * Сформируем url авторизации и токена
-         */
+        // * Сформируем url авторизации и токена
         $this->sAuthUrl = $this->EvalUrl($this->sAuthUrl);
 
         if ($this->iVersion == 1) {
             $this->sAuthUrl = Config::Get('path.root.web') . '/auth/1/' . $this->sName;
         }
-
     }
 
     /**
      * Отправляет запрос авторизации серверу
      *
      * @param string $sUrl Урл запроса
-     * @param bool $bPost
+     * @param bool   $bPost
      * @param bool|array $aHeaders
-     * @return bool|stdClass
+     *
+     * @return string
      */
     protected function SendRequest($sUrl, $bPost = TRUE, $aHeaders = FALSE) {
 
@@ -386,15 +381,25 @@ abstract class AuthProvider {
         return $sQueryResult;
     }
 
-
+    /**
+     * @param $string
+     *
+     * @return bool
+     */
     protected function isJson($string) {
+
         json_decode($string);
 
         return (json_last_error() == JSON_ERROR_NONE);
     }
 
-
+    /**
+     * @param $string
+     *
+     * @return object
+     */
     protected function DecodeGetString($string) {
+
         $query = explode('&', $string);
         $params = array();
 
@@ -414,7 +419,7 @@ abstract class AuthProvider {
      * @param bool|array $aHeaders
      * @param bool|array $aAdditionalData
      *
-     * @return bool
+     * @return bool|stdClass
      */
     protected function LoadTokenData($bPost = TRUE, $sCodeParamName = 'code', $aHeaders = FALSE, $aAdditionalData = FALSE) {
 
@@ -435,19 +440,18 @@ abstract class AuthProvider {
         }
 
         if ($this->isJson($aData)) {
-            $aData = json_decode($aData);
+            $oData = json_decode($aData);
         } else {
-            $aData = $this->DecodeGetString($aData);
+            $oData = $this->DecodeGetString($aData);
         }
 
-
-        if (isset($aData->error) || !isset($aData->access_token)) {
+        if (isset($oData->error) || !isset($oData->access_token)) {
             $this->setLastErrorCode(3);
 
             return FALSE;
         }
 
-        return $aData;
+        return $oData;
     }
 
     /**
@@ -458,7 +462,7 @@ abstract class AuthProvider {
      * @param bool $bPost
      * @param bool|array $aHeaders
      *
-     * @return bool
+     * @return bool|string
      */
     function LoadAdditionalData($oToken, $aParam, $bPost = TRUE, $aHeaders = FALSE) {
 
@@ -469,14 +473,14 @@ abstract class AuthProvider {
 
         $this->sUserInfoUrl = $this->EvalUrl($this->sUserInfoUrl, $aParam);
 
-        $aData = $this->SendRequest($this->sUserInfoUrl, $bPost, $aHeaders);
-        if (!$aData) {
+        $sData = $this->SendRequest($this->sUserInfoUrl, $bPost, $aHeaders);
+        if (!$sData) {
             $this->setLastErrorCode(3);
 
             return FALSE;
         }
 
-        return $aData;
+        return $sData;
     }
 
     /**
@@ -484,7 +488,7 @@ abstract class AuthProvider {
      *
      * @param $aData
      *
-     * @return mixed|object
+     * @return object
      */
     protected function EvalData($aData) {
 
@@ -504,10 +508,16 @@ abstract class AuthProvider {
      *
      * @return PluginAr_ModuleAuthProvider_EntityData
      */
-    abstract public function GetUserData(PluginAr_ModuleAuthProvider_EntityUserToken $oToken);
+    abstract public function GetUserData($oToken);
 
+    /**
+     * @return PluginAr_ModuleAuthProvider_EntityUserToken
+     */
     abstract public function GetUserToken();
 
+    /**
+     * @return string
+     */
     public function PrepareAuthPath() {
 
         return '/';
@@ -593,6 +603,7 @@ abstract class AuthProvider {
 
         return FALSE;
     }
+
 }
 
 // EOF

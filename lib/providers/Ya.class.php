@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . "/../AuthProvider.class.php";
+require_once __DIR__ . '/../AuthProvider.class.php';
 
 class YaProvider extends AuthProvider {
 
@@ -19,8 +19,9 @@ class YaProvider extends AuthProvider {
     /**
      * Получение токена пользователя
      *
-     * @return PluginAr_ModuleAuthProvider_EntityUserToken
      * @throws Exception
+     *
+     * @return bool|PluginAr_ModuleAuthProvider_EntityUserToken
      */
     public function GetUserToken() {
 
@@ -28,9 +29,7 @@ class YaProvider extends AuthProvider {
             return FALSE;
         }
 
-        /**
-         * Возвратим объект токена
-         */
+        // * Возвратим объект токена
         $oToken = Engine::GetEntity('PluginAr_ModuleAuthProvider_EntityUserToken', array(
             'token_provider_name'    => $this->sName,
             'token_data'             => $aData->access_token,
@@ -41,7 +40,12 @@ class YaProvider extends AuthProvider {
         return $oToken;
     }
 
-    public function GetUserData(PluginAr_ModuleAuthProvider_EntityUserToken $oToken) {
+    /**
+     * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
+     * @return bool|Entity
+     */
+    public function GetUserData($oToken) {
 
         if (!$aData = $this->LoadAdditionalData(
             $oToken,
@@ -56,10 +60,7 @@ class YaProvider extends AuthProvider {
         // Раскодируем
         $oData = json_decode($aData);
 
-        /**
-         * Получили дополнительные данные. Заполним профиль из того, что есть
-         */
-
+        // * Получили дополнительные данные. Заполним профиль из того, что есть
         return Engine::GetEntity('PluginAr_ModuleAuthProvider_EntityData', array(
             'data_provider_name' => $this->sName,
             'data_login'         => $this->sName . '_' . $oData->id,
@@ -72,8 +73,8 @@ class YaProvider extends AuthProvider {
             'data_mail'          => @$oData->default_email,
             'data_photo'         => '',
         ));
-
     }
 
-
 }
+
+// EOF

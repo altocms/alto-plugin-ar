@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . "/../AuthProvider.class.php";
+require_once __DIR__ . '/../AuthProvider.class.php';
 
 class GithubProvider extends AuthProvider {
 
@@ -10,6 +10,7 @@ class GithubProvider extends AuthProvider {
     public $sUserInfoUrl = 'https://api.github.com/user?access_token=%%access_token%%';
 
     public function Init() {
+
         parent::Init();
 
         $sState = Engine::getInstance()->Session_Get('github_state');
@@ -24,8 +25,9 @@ class GithubProvider extends AuthProvider {
     /**
      * Получение токена пользователя
      *
-     * @return PluginAr_ModuleAuthProvider_EntityUserToken
      * @throws Exception
+     *
+     * @return bool|PluginAr_ModuleAuthProvider_EntityUserToken
      */
     public function GetUserToken() {
 
@@ -40,11 +42,7 @@ class GithubProvider extends AuthProvider {
             return FALSE;
         }
 
-
-
-        /**
-         * Возвратим объект токена
-         */
+        // * Возвратим объект токена
         $oToken = Engine::GetEntity('PluginAr_ModuleAuthProvider_EntityUserToken', array(
             'token_provider_name'    => $this->sName,
             'token_data'             => $aData->access_token,
@@ -55,9 +53,14 @@ class GithubProvider extends AuthProvider {
         return $oToken;
     }
 
-    public function GetUserData(PluginAr_ModuleAuthProvider_EntityUserToken $oToken) {
+    /**
+     * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
+     * @return bool|Entity
+     */
+    public function GetUserData($oToken) {
 
-        if (!$aData = $this->LoadAdditionalData(
+        if (!$sData = $this->LoadAdditionalData(
             $oToken,
             array(
                 '%%access_token%%' => $oToken->getTokenData(),
@@ -69,16 +72,13 @@ class GithubProvider extends AuthProvider {
         }
 
         // Раскодируем
-        $oData = json_decode($aData);
+        $oData = json_decode($sData);
 
-        if (is_null($oData)) {
+        if (empty($oData)) {
             return false;
         }
 
-        /**
-         * Получили дополнительные данные. Заполним профиль из того, что есть
-         */
-
+        // * Получили дополнительные данные. Заполним профиль из того, что есть
         return Engine::GetEntity('PluginAr_ModuleAuthProvider_EntityData', array(
             'data_provider_name' => $this->sName,
             'data_login'         => $this->sName . '_' . $oData->id,
@@ -91,8 +91,8 @@ class GithubProvider extends AuthProvider {
             'data_mail'          => @$oData->email,
             'data_photo'         => @$oData->avatar_url,
         ));
-
     }
 
-
 }
+
+// EOF

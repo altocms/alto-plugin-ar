@@ -48,34 +48,42 @@ class PluginAr_HookAr extends Hook {
         $this->AddHook('module_user_authorization_after', 'AfterAuth');
     }
 
-
+    /**
+     * @return string
+     */
     public function TemplateAddProfileInvitedUser() {
 
         if (Router::GetAction() == 'profile') {
             E::Module('Viewer')->Assign('login', Router::GetActionEvent());
 
-            return E::Module('Viewer')->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'tpls/social.invited.inject.tpl');
+            return E::Module('Viewer')->Fetch(Plugin::GetTemplateDir(__CLASS__) . 'tpls/social.invited.inject.tpl');
         }
+        return '';
     }
 
-
+    /**
+     * @param $aData
+     *
+     * @return string
+     */
     public function TemplateAddRepostInGroupLink($aData) {
 
         if (!(E::IsAdmin() && !Config::Get('plugin.ar.registration_only') && Config::Get('plugin.ar.providers.fb.fb_group_id'))) {
-            return;
+            return '';
         }
 
         /** @var ModuleTopic_EntityTopic $oTopic */
         if (isset($aData['topic']) && $oTopic = $aData['topic']) {
             E::Module('Viewer')->Assign('sTopicId', $oTopic->getId());
-            return E::Module('Viewer')->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'tpls/social.repost.in.group.inject.tpl');
+            return E::Module('Viewer')->Fetch(Plugin::GetTemplateDir(__CLASS__) . 'tpls/social.repost.in.group.inject.tpl');
         }
+        return '';
     }
 
     /**
      * Затираем сессию после успешной авторизации
      */
-    public  function AfterAuth() {
+    public function AfterAuth() {
 
         E::Module('Session')->Drop('sUserData');
         E::Module('Session')->Drop('sTokenData');
@@ -86,7 +94,7 @@ class PluginAr_HookAr extends Hook {
      *
      * @return string
      */
-    private function GetSocialIcons() {
+    private function _getSocialIcons() {
 
         $sMenu = '';
         foreach (Config::Get('plugin.ar.providers') as $sProviderName => $aProviderData) {
@@ -95,26 +103,27 @@ class PluginAr_HookAr extends Hook {
             if ($oProvider) {
                 E::Module('Viewer')->Assign('sAuthUrl', $oProvider->sAuthUrl);
                 E::Module('Viewer')->Assign('sProviderName', $sProviderName);
-                $sMenu .= E::Module('Viewer')->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'tpls/social.buttons.inject.tpl');
+                $sMenu .= E::Module('Viewer')->Fetch(Plugin::GetTemplateDir(__CLASS__) . 'tpls/social.buttons.inject.tpl');
             }
         }
-
 
         return $sMenu;
     }
 
-
+    /**
+     * @return string
+     */
     public function TemplateAddProfileLink() {
 
         if (Router::GetActionEvent() == 'social') {
             E::Module('Viewer')->Assign('sMenuSubItemSelect', 'social');
         }
 
-        return E::Module('Viewer')->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'tpls/social.profile.inject.tpl');
+        return E::Module('Viewer')->Fetch(Plugin::GetTemplateDir(__CLASS__) . 'tpls/social.profile.inject.tpl');
     }
 
     /**
-     * Добавляет иконки соцюсетей на страницу профиля
+     * Добавляет иконки соцсетей на страницу профиля
      *
      * @return string
      */
@@ -122,18 +131,18 @@ class PluginAr_HookAr extends Hook {
 
         E::Module('Session')->Set('return_path', Router::RealUrl());
 
-        return '<ul class="settings-social">' . $this->GetSocialIcons() . '</ul>';
+        return '<ul class="settings-social">' . $this->_getSocialIcons() . '</ul>';
     }
 
     /**
-     * Добавляет иконки соцюсетей на страницу профиля
+     * Добавляет иконки соцсетей на страницу профиля
      *
      * @return string
      */
     public function TemplateAddProfileSocialListPage() { //social.page.inject.tpl
 
         E::Module('Viewer')->Assign('sButtons', $this->TemplateAddProfileSocialList());
-        return E::Module('Viewer')->Fetch(Plugin::GetTemplatePath(__CLASS__) . 'tpls/social.page.inject.tpl');
+        return E::Module('Viewer')->Fetch(Plugin::GetTemplateDir(__CLASS__) . 'tpls/social.page.inject.tpl');
     }
 
 }

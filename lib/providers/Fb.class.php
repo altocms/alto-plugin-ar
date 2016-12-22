@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . "/../AuthProvider.class.php";
+require_once __DIR__ . '/../AuthProvider.class.php';
 
 class FbProvider extends AuthProvider {
 
@@ -21,9 +21,11 @@ class FbProvider extends AuthProvider {
      * Получает идентфикаторы друзей пользователя из социальной сети
      *
      * @param $oToken
+     *
      * @return bool|string[]
      */
     public function GetFriendsId($oToken) {
+
         $sRepostUrl = "https://graph.facebook.com/me/friends?access_token={$oToken->getTokenData()}";
 
         // Посылаем
@@ -50,7 +52,6 @@ class FbProvider extends AuthProvider {
      *
      * @param ModuleTopic_EntityTopic                     $oTopic
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
-     * @return bool
      */
     public function PostInGroup($oTopic, $oToken) {
 
@@ -61,7 +62,6 @@ class FbProvider extends AuthProvider {
 
         // Посылаем
         $this->SendRequest($sRepostUrl, TRUE);
-
     }
 
     /**
@@ -70,6 +70,7 @@ class FbProvider extends AuthProvider {
      * @param string                                      $sStatus
      * @param                                             $sUrl
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @return bool|void
      */
     public function RepostWall($sStatus, $sUrl, $oToken) {
@@ -78,10 +79,8 @@ class FbProvider extends AuthProvider {
         $sStatus = strip_tags($sStatus);
         $sStatus = $this->CropText($sStatus, '...', 420);
 
-
         // Посылаем
         $this->SendRequest($this->GetRepostUrl($oToken, $sStatus), TRUE);
-
     }
 
     /**
@@ -89,6 +88,7 @@ class FbProvider extends AuthProvider {
      *
      * @param string                                      $sStatus
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @return bool|void
      */
     public function RepostStatus($sStatus, $oToken) {
@@ -97,19 +97,21 @@ class FbProvider extends AuthProvider {
         $sStatus = strip_tags($sStatus);
         $sStatus = $this->CropText($sStatus, '...', 420);
 
-
         // Посылаем
         $this->SendRequest($this->GetRepostUrl($oToken, $sStatus), TRUE);
-
     }
 
+    /**
+     * @param ModuleTopic_EntityTopic                     $oTopic
+     * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     */
     public function RepostPost($oTopic, $oToken) {
+
         $sStatus = Engine::getInstance()->User_GetCurrentUserText('topic');
         $sStatus = str_replace('{link}', $oTopic->getTitle(), $sStatus);
 
         // Посылаем
         $this->SendRequest($this->GetRepostUrl($oToken, $sStatus . '   ' . Config::Get('path.root.web') . "t/{$oTopic->getId()}"), TRUE);
-
     }
 
     /**
@@ -120,6 +122,7 @@ class FbProvider extends AuthProvider {
      * @return string
      */
     private function GetRepostUrl($oToken, $sText) {
+
         return "https://graph.facebook.com/{$oToken->getTokenProviderUserId()}/feed?access_token={$oToken->getTokenData()}&message={$sText}";
     }
 
@@ -136,9 +139,7 @@ class FbProvider extends AuthProvider {
             return FALSE;
         }
 
-        /**
-         * Возвратим объект токена
-         */
+        // * Возвратим объект токена
         $oToken = Engine::GetEntity('PluginAr_ModuleAuthProvider_EntityUserToken', array(
             'token_provider_name'    => $this->sName,
             'token_data'             => $aData->access_token,
@@ -149,27 +150,30 @@ class FbProvider extends AuthProvider {
         return $oToken;
     }
 
-    public function GetUserData(PluginAr_ModuleAuthProvider_EntityUserToken $oToken) {
+    /**
+     * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
+     * @return bool|Entity
+     */
+    public function GetUserData($oToken) {
 
-        if (!$aData = $this->LoadAdditionalData(
+        if (!$sData = $this->LoadAdditionalData(
             $oToken,
             array(
                 '%%public_key%%'   => Config::Get('plugin.ar.providers.od.od_public_key'),
                 '%%access_token%%' => $oToken->getTokenData(),
-                '%%signature%%'    => md5("application_key=" . Config::Get('plugin.ar.providers.od.od_public_key') . "method=users.getCurrentUser" . md5($oToken->getTokenData() . Config::Get('plugin.ar.providers.od.od_secret_key')))
+                '%%signature%%'    => md5('application_key=' . Config::Get('plugin.ar.providers.od.od_public_key') . 'method=users.getCurrentUser' . md5($oToken->getTokenData() . Config::Get('plugin.ar.providers.od.od_secret_key')))
             ), FALSE)
         ) {
             return FALSE;
         }
 
         // Раскодируем
-        $oData = json_decode($aData);
+        $oData = json_decode($sData);
 
-        /**
-         * Получили дополнительные данные. Заполним профиль из того, что есть
-         */
-        if (@$oData->birthday) {
-            list($month,$date,$year) = sscanf(@$oData->birthday, "%d/%d/%d");
+        // * Получили дополнительные данные. Заполним профиль из того, что есть
+        if (isset($oData->birthday)) {
+            list($month,$date,$year) = sscanf(@$oData->birthday, '%d/%d/%d');
             $sDate = "{$year}-{$month}-{$date} 00:00:00";
         } else {
             $sDate = null;
@@ -186,8 +190,8 @@ class FbProvider extends AuthProvider {
             'data_mail'          => @$oData->email,
             'data_photo'         => "https://graph.facebook.com/{$oData->id}/picture?type=large",
         ));
-
     }
 
-
 }
+
+// EOF

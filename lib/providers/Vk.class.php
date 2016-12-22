@@ -1,43 +1,43 @@
 <?php
 
-require_once __DIR__ . "/../AuthProvider.class.php";
+require_once __DIR__ . '/../AuthProvider.class.php';
 
 class VkProvider extends AuthProvider {
 
     public $sName = 'vk';
     public $sAuthUrl = 'https://oauth.vk.com/authorize?client_id=%%client_id%%&scope=%%permissions%%&redirect_uri=%%redirect%%&response_type=code&v=5.23';
     public $sTokenUrl = 'https://oauth.vk.com/access_token?client_id=%%client_id%%&client_secret=%%secret_key%%&code=%%code%%&redirect_uri=%%redirect%%';
-    public $sUserInfoUrl = 'https://api.vkontakte.ru/method/getProfiles?uid=%%user_id%%&fields=sex,status,domain,bdate,photo_big&access_token=%%access_token%%';
+    public $sUserInfoUrl = 'https://api.vk.com/method/getProfiles?uid=%%user_id%%&fields=sex,status,domain,bdate,photo_big&access_token=%%access_token%%';
 
     public $aRepostRights = array(
-        AuthProvider::REPOST_RIGHT_WALL   => TRUE, // Репост записей стены, только через javascript
-        AuthProvider::REPOST_RIGHT_STATUS => FALSE, // Репост статуса запрещен, у сайта к такому API нет доступа
-        AuthProvider::REPOST_RIGHT_POST   => TRUE, // Репост топиков, запрещен JS идет get-запросом, а там длина ограничена.
-        AuthProvider::REPOST_RIGHT_FRIENDS => TRUE, // Поиск друзей по сайту
+        AuthProvider::REPOST_RIGHT_WALL     => TRUE, // Репост записей стены, только через javascript
+        AuthProvider::REPOST_RIGHT_STATUS   => FALSE, // Репост статуса запрещен, у сайта к такому API нет доступа
+        AuthProvider::REPOST_RIGHT_POST     => TRUE, // Репост топиков, запрещен JS идет get-запросом, а там длина ограничена.
+        AuthProvider::REPOST_RIGHT_FRIENDS  => TRUE, // Поиск друзей по сайту
     );
 
     /**
      * Получает идентфикаторы друзей пользователя из социальной сети
      *
-     * @param $oToken
+     * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @return bool
      */
     public function GetFriendsId($oToken) {
 
         $this->sUserInfoUrl = $this->EvalUrl(
-            "https://api.vkontakte.ru/method/friends.get?uid=%%user_id%%&access_token=%%access_token%%",
+            'https://api.vk.com/method/friends.get?uid=%%user_id%%&access_token=%%access_token%%',
             array(
                 '%%user_id%%'      => $oToken->getTokenProviderUserId(),
                 '%%access_token%%' => $oToken->getTokenData())
         );
 
-        $aData = $this->SendRequest($this->sUserInfoUrl, FALSE);
-        if (!$aData) {
+        $sData = $this->SendRequest($this->sUserInfoUrl, FALSE);
+        if (!$sData || !$this->isJson($sData)) {
             return FALSE;
         }
-
         // Раскодируем
-        $aData = json_decode($aData);
+        $aData = json_decode($sData);
 
         if (isset($aData->response) && $aFriendId = @$aData->response) {
             return $aFriendId;
@@ -50,7 +50,8 @@ class VkProvider extends AuthProvider {
     /**
      * Получение токена пользователя
      *
-     * @return PluginAr_ModuleAuthProvider_EntityUserToken
+     * @return bool|PluginAr_ModuleAuthProvider_EntityUserToken
+     *
      * @throws Exception
      */
     public function GetUserToken() {
@@ -71,19 +72,20 @@ class VkProvider extends AuthProvider {
         ));
 
         return $oToken;
-
     }
 
     /**
      * Получение дополнительных данных пользователя
      *
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @throws Exception
-     * @return array|PluginAr_ModuleAuthProvider_EntityData
+     *
+     * @return bool|PluginAr_ModuleAuthProvider_EntityData
      */
-    public function GetUserData(PluginAr_ModuleAuthProvider_EntityUserToken $oToken) {
+    public function GetUserData($oToken) {
 
-        if (!$aData = $this->LoadAdditionalData(
+        if (!$sData = $this->LoadAdditionalData(
             $oToken,
             array(
                 '%%user_id%%'      => $oToken->getTokenProviderUserId(),
@@ -94,20 +96,16 @@ class VkProvider extends AuthProvider {
         }
 
         // Раскодируем
-        $aData = json_decode($aData);
+        $aData = json_decode($sData);
 
         // Сократим путь к данным и проверим его, в смысле путь
-        $oData = @$aData->response[0];
-        if (!$aData) {
+        if (!isset($aData->response[0]) || !($oData = @$aData->response[0])) {
             $this->setLastErrorCode(3);
 
             return FALSE;
         }
 
-        /**
-         * Получили дополнительные данные. Заполним профиль из того, что есть
-         */
-
+        // * Получили дополнительные данные. Заполним профиль из того, что есть
         return Engine::GetEntity('PluginAr_ModuleAuthProvider_EntityData', array(
             'data_provider_name' => $this->sName,
             'data_login'         => $this->sName . '_' . $oToken->getTokenProviderUserId(),
@@ -120,7 +118,6 @@ class VkProvider extends AuthProvider {
             'data_mail'          => @$oToken->getTokenEmail(),
             'data_photo'         => @$oData->photo_big,
         ));
-
     }
 
     /**
@@ -129,6 +126,7 @@ class VkProvider extends AuthProvider {
      * @param string $sStatus
      * @param $sUrl
      * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
      * @return bool
      */
     public function RepostWall($sStatus, $sUrl, $oToken) {
@@ -152,5 +150,6 @@ class VkProvider extends AuthProvider {
         return FALSE;
     }
 
-
 }
+
+// EOF

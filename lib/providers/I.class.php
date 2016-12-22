@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . "/../AuthProvider.class.php";
+require_once __DIR__ . '/../AuthProvider.class.php';
 
 class IProvider extends AuthProvider {
 
@@ -40,11 +40,7 @@ class IProvider extends AuthProvider {
             return FALSE;
         }
 
-
-
-        /**
-         * Возвратим объект токена
-         */
+        // * Возвратим объект токена
         $oToken = Engine::GetEntity('PluginAr_ModuleAuthProvider_EntityUserToken', array(
             'token_provider_name'    => $this->sName,
             'token_data'             => $aData->access_token,
@@ -55,9 +51,14 @@ class IProvider extends AuthProvider {
         return $oToken;
     }
 
-    public function GetUserData(PluginAr_ModuleAuthProvider_EntityUserToken $oToken) {
+    /**
+     * @param PluginAr_ModuleAuthProvider_EntityUserToken $oToken
+     *
+     * @return bool|Entity
+     */
+    public function GetUserData($oToken) {
 
-        if (!$aData = $this->LoadAdditionalData(
+        if (!$sData = $this->LoadAdditionalData(
             $oToken,
             array(
                 '%%access_token%%' => $oToken->getTokenData(),
@@ -70,7 +71,7 @@ class IProvider extends AuthProvider {
         }
 
         // Раскодируем
-        $oData = json_decode($aData);
+        $oData = json_decode($sData);
 
         if (@$oData->meta->code != 200) {
             return FALSE;
@@ -78,10 +79,7 @@ class IProvider extends AuthProvider {
 
         $oData = $oData->data;
 
-        /**
-         * Получили дополнительные данные. Заполним профиль из того, что есть
-         */
-
+        // * Получили дополнительные данные. Заполним профиль из того, что есть
         return Engine::GetEntity('PluginAr_ModuleAuthProvider_EntityData', array(
             'data_provider_name' => $this->sName,
             'data_login'         => $this->sName . '_' . @$oData->id,
@@ -94,8 +92,8 @@ class IProvider extends AuthProvider {
             'data_mail'          => '',
             'data_photo'         => @$oData->profile_picture,
         ));
-
     }
 
-
 }
+
+// EOF
