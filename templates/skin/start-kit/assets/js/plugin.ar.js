@@ -11,7 +11,6 @@
 var ls = ls || {};
 
 ls.ar = (function ($) {
-
     /**
      * Поиск друзей по сайту
      *
@@ -20,7 +19,6 @@ ls.ar = (function ($) {
      * @param iSocialId
      */
     this.findFriends = function($this, iSocialId) {
-
         var url = aRouter.auth + 'find/';
 
         $this.find('i').addClass('fa-spin');
@@ -52,7 +50,6 @@ ls.ar = (function ($) {
      * @returns {boolean}
      */
     this.repostInGroup = function($this) {
-
         var url = aRouter.auth + 'repost/';
 
         $this.find('i').addClass('fa-spin');
@@ -79,7 +76,6 @@ ls.ar = (function ($) {
      * @returns {boolean}
      */
     this.removeSocial = function($this, $iSocialId) {
-
         var url = aRouter.auth + 'remove/';
 
         $this.addClass('fa-spin');
@@ -105,8 +101,8 @@ ls.ar = (function ($) {
      * @returns {boolean}
      */
     this.toggleRepost = function($this) {
-
         var url = aRouter.auth + 'toggle/';
+
         ls.progressStart();
         ls.ajax(url, {id: $this.data('id'), 'type': $this.data('type')}, function (result) {
             ls.progressDone();
@@ -128,8 +124,8 @@ ls.ar = (function ($) {
      * @returns {boolean}
      */
     this.setSocialText = function(sType, sText, $this) {
-
         var url = aRouter.auth + 'text/';
+
         ls.progressStart();
         $this.addClass('loading');
         ls.ajax(url, {text_type: sType, text_val: sText}, function (result) {
@@ -144,10 +140,7 @@ ls.ar = (function ($) {
         return false;
     };
 
-
     return this;
-
-
 }).call(ls.ar || {}, jQuery);
 
 // Фейсбук добавляет некрасивый хэш в колбэк-урл, уберем его
@@ -157,27 +150,27 @@ if (window.location.hash && window.location.hash == '#_=_') {
 }
 
 
-
-
-
-tinymce.PluginManager.add('spoiler5', function(editor, url) {
-    editor.addButton('spoiler5', {
-        text: 'S',
-        icon: false,
-        onclick: function() {
-            editor.windowManager.open({
-                title: function() { return 'fffff'; },
-                body: [
-                    {type: 'textbox', name: 'title', label: 'Заголовок'},
-                    {type: 'textbox', name: 'insert', label: 'Содержимое', multiline: !0, minHeight: 300, minWidth: 500, style: "direction: ltr; text-align: left"}
-                ],
-                onsubmit: function(e) {
-                    editor.insertContent('<spoiler title="' + e.data.title + '":>' + e.data.insert + '</spoiler>');
-                }
-            });
-        }
+if (tinymce && tinymce.PluginManager) {
+    tinymce.PluginManager.add('spoiler5', function(editor, url) {
+        editor.addButton('spoiler5', {
+            text: 'S',
+            icon: false,
+            onclick: function() {
+                editor.windowManager.open({
+                    title: function() { return 'fffff'; },
+                    body: [
+                        {type: 'textbox', name: 'title', label: 'Заголовок'},
+                        {type: 'textbox', name: 'insert', label: 'Содержимое', multiline: !0, minHeight: 300, minWidth: 500, style: "direction: ltr; text-align: left"}
+                    ],
+                    onsubmit: function(e) {
+                        editor.insertContent('<spoiler title="' + e.data.title + '":>' + e.data.insert + '</spoiler>');
+                    }
+                });
+            }
+        });
     });
-});
+}
+
 
 var p = ls.settings.presets.tinymce['default']();
 p.plugins = p.plugins + ' spoiler5';
